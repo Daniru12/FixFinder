@@ -3,16 +3,17 @@ package com.example.BGF.service;
 import com.example.BGF.models.User;
 import com.example.BGF.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
-public class UserService {
 
-    private final UserRepository userRepository;
+public class UserService {
+    @Autowired
+    private  UserRepository userRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public UserService(UserRepository userRepository) {

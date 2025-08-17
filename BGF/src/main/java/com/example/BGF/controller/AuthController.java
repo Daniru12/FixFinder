@@ -4,15 +4,16 @@ import com.example.BGF.models.User;
 import com.example.BGF.security.JwtUtil;
 import com.example.BGF.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequiredArgsConstructor
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
-    private final UserService userService;
+    @Autowired
+    private  UserService userService;
     private final JwtUtil jwtUtil;
 
     public AuthController(UserService userService, JwtUtil jwtUtil) {
