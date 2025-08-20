@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FixFinder.iml" filepath="$PROJECT_DIR$/.idea/FixFinder.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fixfinder/fixfinder.iml" filepath="$PROJECT_DIR$/fixfinder/fixfinder.iml" />
     </modules>
   </component>
 </project>

@@ -13,6 +13,9 @@
         <module name="BGF" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="fixfinder" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
