@@ -7,7 +7,7 @@ export default function HomePage() {
   const { user } = useContext(AuthContext);
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div >
        <Home />
       
     </div>
