@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/fixfinder/pom.xml" />
         <option value="$PROJECT_DIR$/../../spm/BGF/pom.xml" />
+        <option value="$PROJECT_DIR$/BGF/pom.xml" />
       </list>
     </option>
   </component>
