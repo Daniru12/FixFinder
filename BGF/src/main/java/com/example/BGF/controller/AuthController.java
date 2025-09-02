@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -29,16 +32,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
+    public ResponseEntity<Map<String, String>> login(@RequestBody User user) {
         return userService.findByUsername(user.getUsername())
                 .map(found -> {
                     if (userService.validatePassword(user.getPassword(), found.getPassword())) {
                         String token = jwtUtil.generateToken(found.getUsername(), found.getRole());
-                        return ResponseEntity.ok(token);
+                        Map<String, String> response = new HashMap<>();
+                        response.put("token", token);
+                        response.put("role", found.getRole());
+                        return ResponseEntity.ok(response);
                     } else {
-                        return ResponseEntity.badRequest().body("Invalid credentials");
+                        return ResponseEntity.badRequest().body(Map.of("error", "Invalid credentials"));
                     }
                 })
-                .orElse(ResponseEntity.badRequest().body("User not found"));
+                .orElse(ResponseEntity.badRequest().body(Map.of("error", "User not found")));
     }
+
+
 }
