@@ -10,16 +10,24 @@ export default function LoginPage() {
   const { login } = useContext(AuthContext);
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await API.post('/auth/login', { username, password });
-      login(res.data);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await API.post('/auth/login', { username, password });
+    const { token, role } = res.data;
+
+    login(token); // Save token in context
+
+    if (role === 'ROLE_ADMIN') {
+      router.push('/admin-dashboard');
+    } else {
       router.push('/');
-    } catch (err) {
-      alert('Login failed');
     }
-  };
+  } catch (err) {
+    alert('Login failed');
+  }
+};
+
 
   return (
     <div style={{ padding: '20px' }}>
