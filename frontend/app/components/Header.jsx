@@ -1,10 +1,12 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Link from 'next/link';
 import { MenuIcon, XIcon, UserIcon } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext'; // adjust path if needed
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -34,7 +36,7 @@ const Header = () => {
                 About Us
               </Link>
               <Link
-                href="/add-service"
+                href="/admin-dashboard"
                 className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Become a Provider
@@ -42,20 +44,36 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* Desktop Login & Sign Up */}
+          {/* Desktop Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link
-              href="/login"
-              className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 transition-colors"
-            >
-              Sign Up
-            </Link>
+            {user ? (
+              <>
+                <span className="text-gray-700 text-sm font-medium">
+                  Hi, {user.username}
+                </span>
+                <button
+                  onClick={logout}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -66,9 +84,6 @@ const Header = () => {
               aria-expanded={isMenuOpen}
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              <span className="sr-only">
-                {isMenuOpen ? 'Close menu' : 'Open main menu'}
-              </span>
               {isMenuOpen ? (
                 <XIcon className="h-6 w-6" aria-hidden="true" />
               ) : (
@@ -106,33 +121,39 @@ const Header = () => {
         </div>
 
         <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
-          <div className="flex items-center mb-4">
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                <UserIcon className="h-6 w-6 text-gray-500" />
-              </div>
+          {user ? (
+            <div>
+              <p className="text-base font-medium text-gray-800 mb-2">
+                Hi, {user.username}
+              </p>
+              <button
+                onClick={() => {
+                  logout();
+                  toggleMenu();
+                }}
+                className="w-full block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
+              >
+                Logout
+              </button>
             </div>
-            <div className="ml-3">
-              <p className="text-base font-medium text-gray-800">Account</p>
+          ) : (
+            <div className="space-y-1">
+              <Link
+                href="/login"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
+                onClick={toggleMenu}
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
+                onClick={toggleMenu}
+              >
+                Sign Up
+              </Link>
             </div>
-          </div>
-
-          <div className="space-y-1">
-            <Link
-              href="/login"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-              onClick={toggleMenu}
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-              onClick={toggleMenu}
-            >
-              Sign Up
-            </Link>
-          </div>
+          )}
         </div>
       </div>
     </header>
