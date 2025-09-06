@@ -24,7 +24,7 @@ const Header = () => {
             </Link>
             <nav className="hidden md:ml-10 md:flex md:space-x-8">
               <Link
-                href="/services"
+                href="/service"
                 className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Find Services
@@ -98,7 +98,7 @@ const Header = () => {
       <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden bg-white border-t border-gray-200`}>
         <div className="px-4 py-3 space-y-1 sm:px-6">
           <Link
-            href="/services"
+            href="/service"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
             onClick={toggleMenu}
           >
