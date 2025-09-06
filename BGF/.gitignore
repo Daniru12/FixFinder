@@ -32,5 +32,11 @@ build/
 ### VS Code ###
 .vscode/
 
+
 src/main/resources/application.properties
 .idea/
+
+
+# Ignore application.properties
+src/main/resources/application.properties
+
