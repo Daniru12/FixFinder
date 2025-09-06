@@ -112,7 +112,7 @@ const Header = () => {
             About Us
           </Link>
           <Link
-            href="/add-service"
+            href="/admin-dashboard"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
             onClick={toggleMenu}
           >

@@ -21,7 +21,7 @@ const services = [
     price: "Starting from $50",
     duration: "1-4 hours",
     category: "plumbing",
-    imageUrl: "https://images.unsplash.com/photo-1581091215360-5e1b102e6c6e?w=500&h=300&fit=crop&auto=format&q=80",
+    imageUrl: "https://i.postimg.cc/vm5FFLZq/image.png",
     priceRange: "Economy",
     detailedPricing: [
       { service: "Leak Repair", price: "$50+" },
@@ -45,7 +45,7 @@ const services = [
     price: "Starting from $40",
     duration: "1-3 hours",
     category: "electrical",
-    imageUrl: "https://images.unsplash.com/photo-1581091012184-8c9aa46016d6?w=500&h=300&fit=crop&auto=format&q=80",
+    imageUrl: "https://i.postimg.cc/W34n6TCG/image.png",
     priceRange: "Economy",
     detailedPricing: [
       { service: "Wiring Repair", price: "$40+" },
@@ -69,7 +69,7 @@ const services = [
     price: "Starting from $80",
     duration: "2-5 hours",
     category: "ac",
-    imageUrl: "https://images.unsplash.com/photo-1594204981520-2c3a2c183c08?w=500&h=300&fit=crop&auto=format&q=80",
+    imageUrl: "https://i.postimg.cc/3RPtKzf2/image.png",
     priceRange: "Standard",
     detailedPricing: [
       { service: "AC Gas Refill", price: "$80+" },
@@ -93,7 +93,7 @@ const services = [
     price: "Starting from $60",
     duration: "1-3 hours",
     category: "appliances",
-    imageUrl: "https://images.unsplash.com/photo-1595461707232-fc0bb6c2c87b?w=500&h=300&fit=crop&auto=format&q=80",
+    imageUrl: "https://i.postimg.cc/5ybFq36Z/image.png",
     priceRange: "Standard",
     detailedPricing: [
       { service: "Compressor Repair", price: "$120+" },
@@ -117,7 +117,7 @@ const services = [
     price: "Starting from $30",
     duration: "1-3 hours",
     category: "general",
-    imageUrl: "https://images.unsplash.com/photo-1581093588401-32d0c5b7fa0b?w=500&h=300&fit=crop&auto=format&q=80",
+    imageUrl: "https://i.postimg.cc/9MNvyx8f/image.png",
     priceRange: "Economy",
     detailedPricing: [
       { service: "Furniture Assembly", price: "$30+" },
