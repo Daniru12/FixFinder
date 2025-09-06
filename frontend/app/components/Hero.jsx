@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, ChevronLeft, ChevronRight, MapPin, Star, Users, Shield, Play, Pause, Phone, Clock, Award } from 'lucide-react';
 
