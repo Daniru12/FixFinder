@@ -29,14 +29,14 @@ public class SecurityConfig {
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/users/admin/**").hasRole("ADMIN")
                         .requestMatchers("/reviews/**").permitAll()
-                        .requestMatchers("/products").permitAll()
+                        .requestMatchers("/products").permitAll() // to all
                         .requestMatchers("/products/category/**").permitAll()
                         .requestMatchers("/products/search").permitAll()
                         .requestMatchers("/products/{id}").permitAll()
                         .requestMatchers("/products/create").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/products/my-products").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/products/{id}/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/products/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/products/admin/**").hasRole("ADMIN") // to admin
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
