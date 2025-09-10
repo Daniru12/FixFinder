@@ -40,6 +40,7 @@ public class AuthController {
                         Map<String, String> response = new HashMap<>();
                         response.put("token", token);
                         response.put("role", found.getRole());
+                        response.put("username", found.getUsername());
                         return ResponseEntity.ok(response);
                     } else {
                         return ResponseEntity.badRequest().body(Map.of("error", "Invalid credentials"));
