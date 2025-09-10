@@ -26,7 +26,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/services/admin/**").hasRole("ADMIN")
                         .requestMatchers("/services/user/**").hasAnyRole("USER","ADMIN")
-                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN", "PROVIDER")
                         .requestMatchers("/users/admin/**").hasRole("ADMIN")
                         .requestMatchers("/reviews/**").permitAll()
                         .requestMatchers("/products").permitAll() // to all

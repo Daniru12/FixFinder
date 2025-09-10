@@ -1,12 +1,17 @@
 'use client';
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const { user, token } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
+    if (!user) {
+      router.push('/login');
+    }
     if (user?.username && token) {
       fetch(`http://localhost:8080/users/profile/${user.username}`, {
         headers: {
@@ -22,11 +27,7 @@ export default function ProfilePage() {
         .then((data) => setProfile(data))
         .catch((err) => console.error(err));
     }
-  }, [user, token]);
-
-  if (!user) {
-    return <p className="text-center mt-10">You need to log in to view your profile.</p>;
-  }
+  }, [user, token, router]);
 
   if (!profile) {
     return <p className="text-center mt-10">Loading profile...</p>;
