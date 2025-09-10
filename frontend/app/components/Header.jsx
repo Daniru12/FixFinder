@@ -44,37 +44,40 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* Desktop Auth Section */}
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <>
-                <span className="text-gray-700 text-sm font-medium">
-                  Hi, {user.username}
-                </span>
-                <button
-                  onClick={logout}
-                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 transition-colors"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
+{/* Desktop Auth Section */}
+<div className="hidden md:flex items-center space-x-4">
+  {user ? (
+    <>
+      <Link href={user.role === 'ROLE_PROVIDER' ? '/providerProfile' : '/userProfile'}>
+        <span className="text-gray-700 text-sm font-medium cursor-pointer hover:underline">
+          Hi, {user.username}
+        </span>
+      </Link>
+      <button
+        onClick={logout}
+        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors"
+      >
+        Logout
+      </button>
+    </>
+  ) : (
+    <>
+      <Link
+        href="/login"
+        className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+      >
+        Login
+      </Link>
+      <Link
+        href="/register"
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 transition-colors"
+      >
+        Sign Up
+      </Link>
+    </>
+  )}
+</div>
+
 
           {/* Mobile Menu Button */}
           <div className="flex items-center md:hidden">
