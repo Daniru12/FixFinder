@@ -36,7 +36,7 @@ const Header = () => {
                 About Us
               </Link>
               <Link
-                href="/admin-dashboard"
+                href="./Admin/admin-dashboard"
                 className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Become a Provider
@@ -48,7 +48,7 @@ const Header = () => {
 <div className="hidden md:flex items-center space-x-4">
   {user ? (
     <>
-      <Link href={user.role === 'ROLE_PROVIDER' ? '/providerProfile' : '/userProfile'}>
+      <Link href={user.role === 'ROLE_PROVIDER' ? './Provider/providerProfile' : './User/userProfile'}>
         <span className="text-gray-700 text-sm font-medium cursor-pointer hover:underline">
           Hi, {user.username}
         </span>
@@ -115,7 +115,7 @@ const Header = () => {
             About Us
           </Link>
           <Link
-            href="/admin-dashboard"
+            href="./Admin/admin-dashboard"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
             onClick={toggleMenu}
           >

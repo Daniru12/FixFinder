@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../context/AuthContext'; // adjust path
+import { AuthContext } from '../../context/AuthContext'; // adjust path
 
 export default function MyServicesPage() {
   const { user, token } = useContext(AuthContext);
@@ -43,7 +43,7 @@ export default function MyServicesPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">My Services</h1>
         <button
-          onClick={() => router.push('/create-service')}
+          onClick={() => router.push('./create-service')}
           className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
         >
           + Create Service
