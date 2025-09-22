@@ -1,7 +1,7 @@
 'use client';
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../context/AuthContext'; // adjust path
+import { AuthContext } from '../../context/AuthContext'; // adjust path
 
 export default function CreateServicePage() {
   const { token } = useContext(AuthContext);
@@ -47,7 +47,7 @@ export default function CreateServicePage() {
       }
 
       await res.json();
-      router.push('/providerServices'); // Redirect back after success
+      router.push('./providerServices'); // Redirect back after success
     } catch (err) {
       setError(err.message);
     } finally {

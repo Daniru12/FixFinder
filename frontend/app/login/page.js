@@ -24,7 +24,7 @@ export default function LoginPage() {
       login(token); // Save token in context
 
       if (role === 'ROLE_ADMIN') {
-        router.push('/admin-dashboard');
+        router.push('./Admin/admin-dashboard');
       } else {
         router.push('/');
       }
