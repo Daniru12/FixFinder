@@ -1,6 +1,6 @@
 'use client';
 import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function ProviderDashboard() {
@@ -76,7 +76,7 @@ export default function ProviderDashboard() {
     Add, edit, or remove the services you provide.
   </p>
   <button
-    onClick={() => router.push('/providerServices')}
+    onClick={() => router.push('./providerServices')}
     className="px-4 py-2 bg-teal-600 text-white text-sm rounded-md hover:bg-teal-700"
   >
     Go to Services
