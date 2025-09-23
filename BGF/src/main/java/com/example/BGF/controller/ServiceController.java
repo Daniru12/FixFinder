@@ -23,6 +23,12 @@ public class ServiceController {
         return ResponseEntity.ok(serviceService.addService(service, user));
     }
 
+    @PostMapping("/provider/add")
+    public ResponseEntity<AppService> addServiceByProvider(@RequestBody AppService service, @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(serviceService.addService(service, user));
+    }
+
+
     @GetMapping("/user/all")
     public ResponseEntity<List<AppService>> getAll() {
         return ResponseEntity.ok(serviceService.getAllServices());
