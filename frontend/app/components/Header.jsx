@@ -30,6 +30,12 @@ const Header = () => {
                 Find Services
               </Link>
               <Link
+                href="/products"
+                className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Products
+              </Link>
+              <Link
                 href="/contact"
                 className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
@@ -106,6 +112,13 @@ const Header = () => {
             onClick={toggleMenu}
           >
             Find Services
+          </Link>
+          <Link
+            href="/products"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
+            onClick={toggleMenu}
+          >
+            Products
           </Link>
           <Link
             href="/about"
