@@ -1,7 +1,9 @@
 package com.example.BGF.service;
 
 import com.example.BGF.models.Booking;
+import com.example.BGF.models.User;
 import com.example.BGF.repository.BookingRepository;
+import com.example.BGF.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +12,11 @@ import java.util.Optional;
 @Service
 public class BookingService {
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
 
-    public BookingService(BookingRepository bookingRepository) {
+    public BookingService(BookingRepository bookingRepository,UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
+        this.userRepository = userRepository;
     }
 
     public Booking createBooking(Booking booking) {
@@ -23,6 +27,23 @@ public class BookingService {
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }
+
+    public List<Booking> getBookingsForUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        switch (user.getRole()) {
+            case "CUSTOMER":
+                return bookingRepository.findByCustomerId(user.getId());
+            case "PROVIDER":
+                return bookingRepository.findByServiceUserId(user.getId());
+            case "ADMIN":
+                return bookingRepository.findAll();
+            default:
+                throw new RuntimeException("Unknown user role: " + user.getRole());
+        }
+    }
+
 
     public Optional<Booking> getBookingById(Long id) {
         return bookingRepository.findById(id);

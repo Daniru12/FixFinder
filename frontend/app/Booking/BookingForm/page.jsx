@@ -3,24 +3,18 @@
 import { useState, useEffect } from "react";
 
 export default function BookingForm() {
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerId, setCustomerId] = useState("");
   const [serviceId, setServiceId] = useState("");
-  const [services, setServices] = useState([]);
+  const [services, setServices] = useState([
+    { id: 1, name: "Water Pipe Repair", price: 2500 },
+    { id: 2, name: "Electrical Work", price: 3500 },
+    { id: 3, name: "House Cleaning", price: 4500 },
+  ]);
   const [scheduledDate, setScheduledDate] = useState("");
   const [status, setStatus] = useState("PENDING");
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    // Fetch services or use dummy data
-    setServices([
-      { id: 1, name: "Water Pipe Repair", price: 2500 },
-      { id: 2, name: "Electrical Work", price: 3500 },
-      { id: 3, name: "House Cleaning", price: 4500 },
-    ]);
-  }, []);
 
   useEffect(() => {
     const selected = services.find((s) => String(s.id) === String(serviceId));
@@ -30,14 +24,14 @@ export default function BookingForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!customerName || !customerEmail || !serviceId || !scheduledDate) {
+    if (!customerId || !serviceId || !scheduledDate) {
       setMessage("Please fill in all required fields.");
       return;
     }
 
     const booking = {
-      customer: { username: customerName, email: customerEmail },
-      service: { id: Number(serviceId) },
+      customer: { id: Number(customerId) },   // ✅ nested object
+      service: { id: Number(serviceId) },     // ✅ nested object
       bookingDate: new Date().toISOString(),
       scheduledDate: new Date(scheduledDate).toISOString(),
       status,
@@ -62,19 +56,18 @@ export default function BookingForm() {
       }
 
       const result = await response.json();
-      setMessage("Booking created successfully!");
+      setMessage("✅ Booking created successfully!");
       console.log("Booking response:", result);
 
       // Reset form
-      setCustomerName("");
-      setCustomerEmail("");
+      setCustomerId("");
       setServiceId("");
       setScheduledDate("");
       setStatus("PENDING");
       setTotalPrice(0);
     } catch (error) {
       console.error("Booking error:", error);
-      setMessage(`Error: ${error.message}`);
+      setMessage(`❌ Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -86,36 +79,30 @@ export default function BookingForm() {
         <h1 className="text-2xl font-semibold mb-4">Create Booking</h1>
 
         {message && (
-          <div className={`mb-4 p-3 rounded ${message.startsWith("Error") ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}>
+          <div
+            className={`mb-4 p-3 rounded ${
+              message.startsWith("❌") ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+            }`}
+          >
             {message}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Customer ID */}
           <div>
-            <label className="block text-sm font-medium mb-1">Customer Name</label>
+            <label className="block text-sm font-medium mb-1">Customer ID</label>
             <input
-              type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              type="number"
+              value={customerId}
+              onChange={(e) => setCustomerId(e.target.value)}
               className="w-full rounded-lg border-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-200 p-2"
-              placeholder="Enter full name"
+              placeholder="Enter customer ID"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Customer Email</label>
-            <input
-              type="email"
-              value={customerEmail}
-              onChange={(e) => setCustomerEmail(e.target.value)}
-              className="w-full rounded-lg border-gray-200 shadow-sm focus:ring-2 focus:ring-indigo-200 p-2"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
+          {/* Service */}
           <div>
             <label className="block text-sm font-medium mb-1">Service</label>
             <select
@@ -133,6 +120,7 @@ export default function BookingForm() {
             </select>
           </div>
 
+          {/* Scheduled Date */}
           <div>
             <label className="block text-sm font-medium mb-1">Scheduled Date & Time</label>
             <input
@@ -144,6 +132,7 @@ export default function BookingForm() {
             />
           </div>
 
+          {/* Status */}
           <div>
             <label className="block text-sm font-medium mb-1">Status</label>
             <select
@@ -158,6 +147,7 @@ export default function BookingForm() {
             </select>
           </div>
 
+          {/* Total Price */}
           <div>
             <label className="block text-sm font-medium mb-1">Total Price (LKR)</label>
             <input
@@ -171,9 +161,14 @@ export default function BookingForm() {
             />
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
-            className={`px-5 py-2 rounded-lg text-white font-medium shadow ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"}`}
+            className={`px-5 py-2 rounded-lg text-white font-medium shadow ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
             disabled={loading}
           >
             {loading ? "Creating..." : "Create Booking"}

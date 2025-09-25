@@ -3,6 +3,8 @@ package com.example.BGF.controller;
 import com.example.BGF.models.Booking;
 import com.example.BGF.service.BookingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +28,13 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<List<Booking>> getAllBookings() {
         return ResponseEntity.ok(bookingService.getAllBookings());
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<Booking>> getMyBookings() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName(); // extracted from JWT
+        return ResponseEntity.ok(bookingService.getBookingsForUser(username));
     }
 
     // Get booking by ID
