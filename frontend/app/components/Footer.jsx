@@ -76,8 +76,8 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/add-service" className="text-gray-300 hover:text-teal-400 transition-colors">
-                  Become a Provider
+                <Link href="/review" className="text-gray-300 hover:text-teal-400 transition-colors">
+                  Review
                 </Link>
               </li>
               <li>
