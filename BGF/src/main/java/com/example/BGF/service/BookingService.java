@@ -30,19 +30,22 @@ public class BookingService {
 
     public List<Booking> getBookingsForUser(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
-        switch (user.getRole()) {
-            case "CUSTOMER":
-                return bookingRepository.findByCustomerId(user.getId());
-            case "PROVIDER":
-                return bookingRepository.findByServiceUserId(user.getId());
-            case "ADMIN":
-                return bookingRepository.findAll();
-            default:
-                throw new RuntimeException("Unknown user role: " + user.getRole());
+        String role = user.getRole();
+
+        if ("CUSTOMER".equalsIgnoreCase(role)) {
+            return bookingRepository.findByCustomerId(user.getId());
+        } else if ("PROVIDER".equalsIgnoreCase(role)) {
+            return bookingRepository.findByServiceUserId(user.getId());
+        } else if ("ADMIN".equalsIgnoreCase(role)) {
+            return bookingRepository.findAll();
+        } else {
+            throw new IllegalStateException("Unsupported role: " + role);
         }
     }
+
+
 
 
     public Optional<Booking> getBookingById(Long id) {

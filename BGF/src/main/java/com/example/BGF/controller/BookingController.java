@@ -1,6 +1,7 @@
 package com.example.BGF.controller;
 
 import com.example.BGF.models.Booking;
+import com.example.BGF.models.User;
 import com.example.BGF.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,11 +32,12 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Booking>> getMyBookings() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName(); // extracted from JWT
-        return ResponseEntity.ok(bookingService.getBookingsForUser(username));
+    public ResponseEntity<List<Booking>> getMyBookings(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();  // cast principal back to your User entity
+        List<Booking> bookings = bookingService.getBookingsForUser(user.getUsername());
+        return ResponseEntity.ok(bookings);
     }
+
 
     // Get booking by ID
     @GetMapping("/{id}")
