@@ -45,6 +45,41 @@ public class BookingService {
         }
     }
 
+    public List<Booking> getBookingsForProvider(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        if (!"PROVIDER".equalsIgnoreCase(user.getRole())) {
+            throw new RuntimeException("Unauthorized: Only providers can access this");
+        }
+
+        return bookingRepository.findByServiceUserId(user.getId());
+    }
+
+    public Booking updateBookingStatus(Long bookingId, String status) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        booking.setStatus(status);
+        return bookingRepository.save(booking);
+    }
+
+    public void removeBooking(Long bookingId, User user) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        // Only provider of the service or admin can remove
+        if (user.getRole().equalsIgnoreCase("PROVIDER")) {
+            if (!booking.getService().getUser().getId().equals(user.getId())) {
+                throw new RuntimeException("Cannot remove booking of another provider");
+            }
+        } else if (!user.getRole().equalsIgnoreCase("ADMIN")) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        bookingRepository.delete(booking);
+    }
+
 
 
 

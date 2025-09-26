@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/api/bookings/**").authenticated()
+                        .requestMatchers("/api/bookings/confirm/**").hasRole("PROVIDER")
                         .requestMatchers("/services/admin/**").hasRole("ADMIN")
                         .requestMatchers("/services/provider/**").hasRole("PROVIDER")
                         .requestMatchers("/services/user/all").permitAll()

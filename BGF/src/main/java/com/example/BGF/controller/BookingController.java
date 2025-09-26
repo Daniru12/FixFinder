@@ -4,11 +4,13 @@ import com.example.BGF.models.Booking;
 import com.example.BGF.models.User;
 import com.example.BGF.service.BookingService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -38,6 +40,37 @@ public class BookingController {
         return ResponseEntity.ok(bookings);
     }
 
+    @GetMapping("/provider")
+    public ResponseEntity<List<Booking>> getBookingsForProvider(Authentication authentication) {
+        String username = ((com.example.BGF.models.User) authentication.getPrincipal()).getUsername();
+        return ResponseEntity.ok(bookingService.getBookingsForProvider(username));
+    }
+
+    @PreAuthorize("hasAuthority('PROVIDER')")
+    @PutMapping("/confirm/{bookingId}")
+    public ResponseEntity<Booking> confirmBooking(
+            @PathVariable Long bookingId,
+            @RequestBody Map<String, String> requestBody) {
+
+        String status = requestBody.get("status"); // get status from body
+        if (status == null || status.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        Booking booking = bookingService.updateBookingStatus(bookingId, status);
+        return ResponseEntity.ok(booking);
+    }
+
+
+
+
+
+    @DeleteMapping("/api/bookings/{bookingId}")
+    public ResponseEntity<String> removeBooking(@PathVariable Long bookingId, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        bookingService.removeBooking(bookingId, user);
+        return ResponseEntity.ok("Booking removed successfully");
+    }
 
     // Get booking by ID
     @GetMapping("/{id}")
