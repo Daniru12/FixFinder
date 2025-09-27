@@ -156,9 +156,6 @@ export default function ProductsPage() {
       {/* Header with search bar */}
       <div className="w-full px-4 sm:px-6 md:px-8 pt-6 pb-4 sticky top-0 z-10 backdrop-blur-md bg-white/30">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            FixFinder Products
-          </h1>
           <div className="backdrop-blur-sm bg-white/70 rounded-xl shadow-lg border border-white/50 p-2 flex items-center max-w-2xl mx-auto">
             <SearchIcon className="h-4 w-4 text-blue-600 mr-2" />
             <input
