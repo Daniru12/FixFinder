@@ -41,6 +41,12 @@ public class AuthController {
                         response.put("token", token);
                         response.put("role", found.getRole());
                         response.put("username", found.getUsername());
+                        response.put("email", found.getEmail());
+                        response.put("phone", found.getPhone());
+                        response.put("fullName", found.getFullName());
+                        response.put("available", String.valueOf(found.isAvailable()));
+                        response.put("address", found.getAddress());
+                        response.put("serviceType", found.getServiceType());
                         return ResponseEntity.ok(response);
                     } else {
                         return ResponseEntity.badRequest().body(Map.of("error", "Invalid credentials"));
