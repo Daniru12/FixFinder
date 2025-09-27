@@ -24,8 +24,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/bookings/confirm/**").permitAll()
                         .requestMatchers("/api/bookings/**").authenticated()
-                        .requestMatchers("/api/bookings/confirm/**").hasRole("PROVIDER")
                         .requestMatchers("/services/admin/**").hasRole("ADMIN")
                         .requestMatchers("/services/provider/**").hasRole("PROVIDER")
                         .requestMatchers("/services/user/all").permitAll()

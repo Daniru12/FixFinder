@@ -46,14 +46,17 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getBookingsForProvider(username));
     }
 
-    @PreAuthorize("hasAuthority('PROVIDER')")
+
+    // Controller method
     @PutMapping("/confirm/{bookingId}")
     public ResponseEntity<Booking> confirmBooking(
             @PathVariable Long bookingId,
             @RequestBody Map<String, String> requestBody) {
 
-        String status = requestBody.get("status"); // get status from body
+
+        String status = requestBody.get("status");
         if (status == null || status.isEmpty()) {
+            System.out.println("⚠️ DEBUG Status missing in request body");
             return ResponseEntity.badRequest().build();
         }
 
