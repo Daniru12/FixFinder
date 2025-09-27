@@ -24,10 +24,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/bookings/**").authenticated()
+                        .requestMatchers("/api/bookings/confirm/**").hasRole("PROVIDER")
                         .requestMatchers("/services/admin/**").hasRole("ADMIN")
                         .requestMatchers("/services/provider/**").hasRole("PROVIDER")
                         .requestMatchers("/services/user/all").permitAll()
-                        .requestMatchers("/services/user/**").hasAnyRole("USER","ADMIN", "PROVIDER")
+                        .requestMatchers("/services/user/**").hasAnyRole("USER", "ADMIN", "PROVIDER")
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN", "PROVIDER")
                         .requestMatchers("/users/admin/**").hasRole("ADMIN")
                         .requestMatchers("/reviews/**").permitAll()
