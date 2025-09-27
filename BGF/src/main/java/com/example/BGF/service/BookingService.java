@@ -4,7 +4,9 @@ import com.example.BGF.models.Booking;
 import com.example.BGF.models.User;
 import com.example.BGF.repository.BookingRepository;
 import com.example.BGF.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,13 +58,18 @@ public class BookingService {
         return bookingRepository.findByServiceUserId(user.getId());
     }
 
+    // Service method
     public Booking updateBookingStatus(Long bookingId, String status) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found"));
-
-        booking.setStatus(status);
-        return bookingRepository.save(booking);
+        return bookingRepository.findById(bookingId)
+                .map(booking -> {
+                    booking.setStatus(status);
+                    return bookingRepository.save(booking);
+                })
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Booking not found"
+                ));
     }
+
 
     public void removeBooking(Long bookingId, User user) {
         Booking booking = bookingRepository.findById(bookingId)
