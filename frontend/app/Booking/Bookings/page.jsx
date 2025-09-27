@@ -111,39 +111,40 @@ export default function BookingsPage() {
   }, [bookings, searchTerm, statusFilter, dateFilter]);
 
   const confirmBooking = async (bookingId) => {
-    try {
-      const res = await fetch(`http://localhost:8080/api/bookings/confirm/${bookingId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
-      });
+  try {
+    const res = await fetch(`http://localhost:8080/api/bookings/confirm/${bookingId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status: "CONFIRMED" }), // <-- Add this
+    });
 
-      if (res.status === 403) {
-        throw new Error("You are not authorized to confirm this booking.");
-      }
-
-      if (res.status === 404) {
-        throw new Error("Booking not found.");
-      }
-
-      if (!res.ok) {
-        throw new Error("Failed to confirm booking.");
-      }
-
-      const updatedBooking = await res.json();
-      setBookings((prev) =>
-        prev.map((b) => (b.id === bookingId ? updatedBooking : b))
-      );
-      
-      // Clear any existing error
-      setError("");
-    } catch (err) {
-      console.error("Error confirming booking:", err);
-      setError(err.message);
+    if (res.status === 403) {
+      throw new Error("You are not authorized to confirm this booking.");
     }
-  };
+
+    if (res.status === 404) {
+      throw new Error("Booking not found.");
+    }
+
+    if (!res.ok) {
+      throw new Error("Failed to confirm booking.");
+    }
+
+    const updatedBooking = await res.json();
+    setBookings((prev) =>
+      prev.map((b) => (b.id === bookingId ? updatedBooking : b))
+    );
+
+    setError("");
+  } catch (err) {
+    console.error("Error confirming booking:", err);
+    setError(err.message);
+  }
+};
+
 
   const removeBooking = async (id) => {
     try {

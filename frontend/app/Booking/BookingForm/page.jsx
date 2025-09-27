@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { ChevronRight, ChevronLeft, User, Calendar, CreditCard, CheckCircle, XCircle, Users, FileText, Clock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { AuthContext } from '../../context/AuthContext';
 
 export default function EnhancedBookingForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [serviceId, setServiceId] = useState("");
-  const [loggedInCustomer, setLoggedInCustomer] = useState(null);
   const [services, setServices] = useState([
     { id: 1, name: "Water Pipe Repair", price: 2500, description: "Complete water pipe repair and maintenance", duration: "2-3 hours" },
     { id: 2, name: "Electrical Work", price: 3500, description: "Electrical installation and repair services", duration: "3-4 hours" },
@@ -22,8 +22,9 @@ export default function EnhancedBookingForm() {
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
-const router = useRouter();
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  const router = useRouter();
+  const { user, token } = useContext(AuthContext);
 
   const steps = [
     { number: 1, title: "Service Selection", icon: FileText, description: "Choose your service" },
@@ -32,16 +33,7 @@ const router = useRouter();
     { number: 4, title: "Confirmation", icon: CheckCircle, description: "Booking complete" },
   ];
 
-  useEffect(() => {
-    if (token) {
-      setLoggedInCustomer({
-        id: 3,
-        name: "Daniru",
-        email: "daniru@gmail.com",
-        phone: "+94 77 123 4567"
-      });
-    }
-  }, [token]);
+  const customerId = user?.id || 3;
 
   useEffect(() => {
     const selected = services.find((s) => String(s.id) === String(serviceId));
@@ -77,45 +69,57 @@ const router = useRouter();
   };
 
   const handleSubmit = async () => {
-    if (!serviceId || !scheduledDate || !loggedInCustomer) {
-      showToast("Please fill in all required fields.", "error");
+    if (!customerId || !serviceId || !scheduledDate || !token) {
+      showToast("You must be logged in and fill all fields to book.", "error");
       return;
     }
 
-    const booking = {
-      customer: { id: Number(loggedInCustomer.id) },
+    // Format dates to "YYYY-MM-DDTHH:mm:ss" (no milliseconds, no timezone)
+    const bookingDate = new Date().toISOString().slice(0, 19);
+    const scheduledDateFormatted = new Date(scheduledDate).toISOString().slice(0, 19);
+
+    // ✅ EXACT JSON FORMAT REQUIRED BY BACKEND
+    const bookingPayload = {
+      customer: { id: customerId },
       service: { id: Number(serviceId) },
-      bookingDate: new Date().toISOString(),
-      scheduledDate: new Date(scheduledDate).toISOString(),
-      status,
-      totalPrice: Number(totalPrice),
+      bookingDate: bookingDate,
+      scheduledDate: scheduledDateFormatted,
+      status: status,
+      totalPrice: Number(totalPrice)
     };
 
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      const success = Math.random() > 0.2;
-      
-      if (success) {
+      const response = await fetch("http://localhost:8080/api/bookings/add", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(bookingPayload)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
         setBookingResult({
           success: true,
-          bookingId: "BK" + Date.now(),
+          bookingId: result.id || "BK" + Date.now(),
           message: "Your booking has been created successfully!"
         });
         showToast("Booking created successfully!", "success");
+        setCurrentStep(4);
       } else {
-        throw new Error("Failed to create booking. Please try again.");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create booking. Please try again.");
       }
-
-      setCurrentStep(4);
     } catch (error) {
       console.error("Booking error:", error);
       setBookingResult({
         success: false,
-        message: error.message
+        message: error.message || "An unexpected error occurred"
       });
-      showToast(error.message, "error");
+      showToast(error.message || "An unexpected error occurred", "error");
       setCurrentStep(4);
     } finally {
       setLoading(false);
@@ -133,8 +137,7 @@ const router = useRouter();
 
   const navigateToBookings = () => {
     showToast("Navigating to all bookings...", "info");
-    console.log("Navigate to all bookings page");
-      router.push("/Booking/Bookings"); 
+    router.push("/Booking/Bookings"); 
   };
 
   return (
@@ -162,17 +165,17 @@ const router = useRouter();
         </div>
 
         {/* Customer Info Card */}
-        {loggedInCustomer && (
+        {user && (
           <div className="mb-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">
-                  {loggedInCustomer.name.charAt(0)}
+                  {(user.name || user.username || "U").charAt(0)}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{loggedInCustomer.name}</h3>
-                  <p className="text-gray-600 text-sm">{loggedInCustomer.email}</p>
-                  <p className="text-gray-600 text-sm">{loggedInCustomer.phone}</p>
+                  <h3 className="font-semibold text-gray-900">{user.name || user.username || "User"}</h3>
+                  <p className="text-gray-600 text-sm">{user.email || ""}</p>
+                  <p className="text-gray-600 text-sm">{user.phone || user.contact || ""}</p>
                 </div>
                 <div className="text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full font-medium">
                   Verified
@@ -331,11 +334,12 @@ const router = useRouter();
                         <User className="mr-2 text-blue-600" size={18} />
                         Customer Information
                       </h3>
-                      {loggedInCustomer && (
+                      {user && (
                         <div className="space-y-1 text-sm">
-                          <p className="font-medium text-gray-800">{loggedInCustomer.name}</p>
-                          <p className="text-gray-600">{loggedInCustomer.email}</p>
-                          <p className="text-gray-600">{loggedInCustomer.phone}</p>
+                          <p className="font-medium text-gray-800">{user.name || user.username}</p>
+                          <p className="text-gray-600">{user.email}</p>
+                          <p className="text-gray-600">{user.phone || user.contact || "N/A"}</p>
+                          <p className="text-gray-600 font-mono">ID: {user.id || 3}</p>
                         </div>
                       )}
                     </div>
@@ -461,9 +465,9 @@ const router = useRouter();
               {currentStep === 3 ? (
                 <button
                   onClick={handleSubmit}
-                  disabled={loading || !token}
+                  disabled={loading || !token || !customerId}
                   className={`px-6 py-2 rounded-md text-white font-medium transition-colors flex items-center space-x-2 ${
-                    loading || !token
+                    loading || !token || !customerId
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700'
                   }`}
