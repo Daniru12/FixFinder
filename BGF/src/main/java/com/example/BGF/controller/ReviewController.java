@@ -17,10 +17,11 @@ public class ReviewController {
     private ReviewService reviewService;
 
     // Create Review
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<Review> createReview(@RequestBody Review review) {
         return ResponseEntity.ok(reviewService.saveReview(review));
     }
+
 
     // Get All Reviews
     @GetMapping
@@ -65,4 +66,6 @@ public class ReviewController {
     public ResponseEntity<Double> getAverageRating(@PathVariable Long serviceId) {
         return ResponseEntity.ok(reviewService.getAverageRating(serviceId));
     }
+
+    
 }
