@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function ReviewForm({ serviceId, userId }) {
+export default function ReviewForm() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [message, setMessage] = useState("");
@@ -12,40 +12,38 @@ export default function ReviewForm({ serviceId, userId }) {
     e.preventDefault();
 
     if (!rating || !comment) {
-      setMessage("Error: Please fill in all fields.");
+      setMessage("❌ Please fill in all fields.");
       return;
     }
 
+    // Nested object payload
     const reviewData = {
       rating: Number(rating),
       comment,
-      user: { id: userId },
-      service: { id: serviceId }
+      user: { id: 1 },      // Hardcoded user ID
+      service: { id: 2 }    // Hardcoded service ID
     };
 
     setLoading(true);
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:8080/api/reviews/add", {
+      const res = await fetch("http://localhost:8080/reviews/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reviewData),
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to submit review");
+        throw new Error("❌ Failed to submit review");
       }
 
-      setMessage("Review submitted successfully!");
+      setMessage("✅ Review submitted successfully!");
       setRating(5);
       setComment("");
     } catch (err) {
       console.error(err);
-      setMessage(`Error: ${err.message}`);
+      setMessage(`❌ ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -58,7 +56,7 @@ export default function ReviewForm({ serviceId, userId }) {
       {message && (
         <div
           className={`mb-4 p-3 rounded ${
-            message.startsWith("Error")
+            message.startsWith("❌")
               ? "bg-red-100 text-red-700"
               : "bg-green-100 text-green-700"
           }`}
@@ -76,9 +74,7 @@ export default function ReviewForm({ serviceId, userId }) {
             className="w-full border-gray-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-200 shadow-sm"
           >
             {[1, 2, 3, 4, 5].map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
+              <option key={r} value={r}>{r}</option>
             ))}
           </select>
         </div>
@@ -98,9 +94,7 @@ export default function ReviewForm({ serviceId, userId }) {
           type="submit"
           disabled={loading}
           className={`w-full py-2 px-4 rounded-lg text-white font-medium ${
-            loading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-indigo-600 hover:bg-indigo-700"
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-indigo-600 hover:bg-indigo-700"
           }`}
         >
           {loading ? "Submitting..." : "Submit Review"}
