@@ -38,19 +38,16 @@ export default function AboutPage() {
     {
       name: 'Sarah Johnson',
       role: 'Founder & CEO',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b332c5cd?w=150&h=150&fit=crop&crop=face',
       description: 'Passionate about connecting people with solutions.'
     },
     {
       name: 'Michael Chen',
       role: 'CTO',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
       description: 'Tech enthusiast focused on innovative problem-solving.'
     },
     {
       name: 'Emily Rodriguez',
       role: 'Head of Design',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
       description: 'Creating beautiful experiences that matter.'
     }
   ];
@@ -63,31 +60,34 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }}></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.05),transparent_50%)]"></div>
 
       <div className="relative z-10">
         {/* Hero Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-              About <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Fixfinder</span>
+          <div className="max-w-6xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-2xl mb-8 shadow-lg">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+              </svg>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              About <span className="bg-gradient-to-r from-cyan-500 to-teal-500 bg-clip-text text-transparent">FixFinder</span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+            <p className="text-xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
               We're on a mission to connect people with the right solutions at the right time. 
               Our platform bridges the gap between problems and expert help.
             </p>
-            <div className="flex flex-wrap justify-center gap-6">
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               {stats.map((stat, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 min-w-[140px]">
-                  <div className="text-3xl mb-2">{stat.icon}</div>
-                  <div className="text-2xl font-bold text-white mb-1">{stat.number}</div>
-                  <div className="text-sm text-gray-300">{stat.label}</div>
+                <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+                  <div className="text-3xl mb-3">{stat.icon}</div>
+                  <div className="text-2xl font-bold text-gray-900 mb-1">{stat.number}</div>
+                  <div className="text-sm text-gray-600">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -95,39 +95,41 @@ export default function AboutPage() {
         </section>
 
         {/* Story Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20">
-              <h2 className="text-3xl font-bold text-white mb-8 text-center">Our Story</h2>
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="space-y-6">
-                  <p className="text-gray-300 leading-relaxed">
-                    Fixfinder was born from a simple observation: people have problems, and there are experts 
-                    who can solve them, but they often can't find each other efficiently.
-                  </p>
-                  <p className="text-gray-300 leading-relaxed">
-                    Founded in 2023, we've grown from a small startup to a trusted platform that helps 
-                    thousands of people every day. Our technology matches users with the right professionals 
-                    based on their specific needs and location.
-                  </p>
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-6">
+                <h2 className="text-4xl font-bold text-gray-900 mb-8">Our Story</h2>
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  FixFinder was born from a simple observation: people have problems, and there are experts 
+                  who can solve them, but they often can't find each other efficiently.
+                </p>
+                <p className="text-gray-600 leading-relaxed text-lg">
+                  Founded in 2023, we've grown from a small startup to a trusted platform that helps 
+                  thousands of people every day. Our technology matches users with the right professionals 
+                  based on their specific needs and location.
+                </p>
+                
+                <div className="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-2xl p-8 border border-cyan-100">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
                       <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">Our Mission</h3>
-                      <p className="text-gray-300">To democratize access to expert help and make problem-solving faster, more efficient, and more reliable for everyone.</p>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Our Mission</h3>
+                      <p className="text-gray-700">To democratize access to expert help and make problem-solving faster, more efficient, and more reliable for everyone.</p>
                     </div>
                   </div>
                 </div>
-                <div className="relative">
-                  <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl p-8 text-center">
-                    <div className="text-6xl mb-4">🚀</div>
-                    <h3 className="text-xl font-semibold text-white mb-4">Innovation First</h3>
-                    <p className="text-gray-300">We leverage cutting-edge technology to create seamless experiences that bring solutions to your fingertips.</p>
-                  </div>
+              </div>
+
+              <div className="lg:pl-8">
+                <div className="bg-gradient-to-br from-cyan-500 to-teal-500 rounded-3xl p-12 text-white text-center shadow-2xl">
+                  <div className="text-6xl mb-6">🚀</div>
+                  <h3 className="text-2xl font-bold mb-4">Innovation First</h3>
+                  <p className="text-cyan-100 text-lg leading-relaxed">We leverage cutting-edge technology to create seamless experiences that bring solutions to your fingertips.</p>
                 </div>
               </div>
             </div>
@@ -137,18 +139,22 @@ export default function AboutPage() {
         {/* Team Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-white mb-12 text-center">Meet Our Team</h2>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
+              <p className="text-xl text-gray-600">The passionate people behind FixFinder</p>
+            </div>
+            
             <div className="grid md:grid-cols-3 gap-8">
               {teamMembers.map((member, index) => (
-                <div key={index} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-center border border-white/20 hover:bg-white/15 transition-all duration-300">
-                  <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 p-1">
-                    <div className="w-full h-full rounded-full bg-gray-300 flex items-center justify-center text-2xl">
+                <div key={index} className="bg-white rounded-3xl p-8 text-center shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:transform hover:scale-105">
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-cyan-500 to-teal-500 p-1">
+                    <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center text-3xl">
                       👤
                     </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2">{member.name}</h3>
-                  <p className="text-purple-300 mb-3 font-medium">{member.role}</p>
-                  <p className="text-gray-300 text-sm">{member.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                  <p className="text-cyan-600 mb-4 font-semibold">{member.role}</p>
+                  <p className="text-gray-600">{member.description}</p>
                 </div>
               ))}
             </div>
@@ -156,117 +162,123 @@ export default function AboutPage() {
         </section>
 
         {/* Contact Form Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-white mb-4">Get In Touch</h2>
-              <p className="text-gray-300 text-lg">Have questions or feedback? We'd love to hear from you.</p>
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4">Get In Touch</h2>
+              <p className="text-xl text-gray-600">Have questions or feedback? We'd love to hear from you.</p>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 md:p-12 border border-white/20">
-              {/* Success Message */}
-              {success && (
-                <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/30 rounded-xl backdrop-blur-sm">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 text-emerald-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="grid lg:grid-cols-2 gap-16">
+              {/* Contact Info */}
+              <div className="space-y-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-8">Contact Information</h3>
+                
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <p className="text-emerald-300 text-sm">{success}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">Email</h4>
+                    <p className="text-gray-600">hello@fixfinder.com</p>
                   </div>
                 </div>
-              )}
 
-              {/* Error Message */}
-              {error && (
-                <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl backdrop-blur-sm">
-                  <div className="flex items-center">
-                    <svg className="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
-                    <p className="text-red-300 text-sm">{error}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">Phone</h4>
+                    <p className="text-gray-600">+1 (555) 123-4567</p>
                   </div>
                 </div>
-              )}
 
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Contact Info */}
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900">Office</h4>
+                    <p className="text-gray-600">123 Innovation Street<br />San Francisco, CA 94105</p>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-2xl p-6 border border-cyan-100">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Office Hours</h4>
+                  <p className="text-gray-700">Monday - Friday: 9:00 AM - 6:00 PM PST</p>
+                  <p className="text-gray-700">Weekend: 10:00 AM - 4:00 PM PST</p>
+                </div>
+              </div>
+
+              {/* Contact Form */}
+              <div className="bg-gray-50 rounded-3xl p-8 border border-gray-200">
+                {/* Success Message */}
+                {success && (
+                  <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-emerald-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-emerald-700 text-sm">{success}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      <p className="text-red-700 text-sm">{error}</p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Contact Information</h3>
-                  
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="text-white font-medium">Email</h4>
-                      <p className="text-gray-300">hello@fixfinder.com</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="text-white font-medium">Phone</h4>
-                      <p className="text-gray-300">+1 (555) 123-4567</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="text-white font-medium">Office</h4>
-                      <p className="text-gray-300">123 Innovation Street<br />San Francisco, CA 94105</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Contact Form */}
-                <div className="space-y-5">
                   <div className="space-y-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                       Your Name
                     </label>
                     <input
                       id="name"
                       name="name"
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Enter your name"
                       value={contactForm.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                       Email Address
                     </label>
                     <input
                       id="email"
                       name="email"
                       type="email"
-                      placeholder="john@example.com"
+                      placeholder="Enter your email"
                       value={contactForm.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
                       Subject
                     </label>
                     <input
@@ -277,31 +289,30 @@ export default function AboutPage() {
                       value={contactForm.subject}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-300">
+                    <label htmlFor="message" className="block text-sm font-medium text-gray-700">
                       Message
                     </label>
                     <textarea
                       id="message"
                       name="message"
-                      rows={4}
+                      rows={5}
                       placeholder="Tell us more..."
                       value={contactForm.message}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 backdrop-blur-sm resize-none"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 resize-none"
                     />
                   </div>
 
                   <button
-                    type="submit"
-                    disabled={isLoading}
                     onClick={handleSubmit}
-                    className="w-full py-3 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    disabled={isLoading}
+                    className="w-full py-3 px-6 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
@@ -327,26 +338,30 @@ export default function AboutPage() {
         </section>
 
         {/* Footer */}
-        <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
-          <div className="max-w-6xl mx-auto text-center">
-            <div className="flex items-center justify-center space-x-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
-                </svg>
+        <footer className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-900 text-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="flex items-center justify-center space-x-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z" />
+                  </svg>
+                </div>
+                <span className="text-white text-2xl font-bold">FixFinder</span>
               </div>
-              <span className="text-white text-xl font-bold">Fixfinder</span>
-            </div>
-            <p className="text-gray-400 mb-6">Connecting problems with solutions, one fix at a time.</p>
-            <div className="flex justify-center space-x-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <span>•</span>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-              <span>•</span>
-              <a href="#" className="hover:text-white transition-colors">Support</a>
-            </div>
-            <div className="mt-6 text-sm text-gray-500">
-              © 2024 Fixfinder. All rights reserved.
+              <p className="text-gray-400 mb-8 text-lg">Connecting problems with solutions, one fix at a time.</p>
+              
+              <div className="flex flex-wrap justify-center gap-8 text-gray-400 mb-8">
+                <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+                <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                <a href="#" className="hover:text-white transition-colors">Support</a>
+                <a href="#" className="hover:text-white transition-colors">Blog</a>
+                <a href="#" className="hover:text-white transition-colors">Careers</a>
+              </div>
+              
+              <div className="text-gray-500">
+                © 2024 FixFinder. All rights reserved.
+              </div>
             </div>
           </div>
         </footer>

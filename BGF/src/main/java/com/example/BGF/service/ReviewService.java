@@ -63,4 +63,6 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByServiceId(serviceId);
         return reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
     }
+
+
 }
