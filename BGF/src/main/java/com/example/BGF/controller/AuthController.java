@@ -39,6 +39,7 @@ public class AuthController {
                         String token = jwtUtil.generateToken(found.getUsername(), found.getRole());
                         Map<String, String> response = new HashMap<>();
                         response.put("token", token);
+                        response.put("id", String.valueOf(found.getId()));
                         response.put("role", found.getRole());
                         response.put("username", found.getUsername());
                         response.put("email", found.getEmail());
