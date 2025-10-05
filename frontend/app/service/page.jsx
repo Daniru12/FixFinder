@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from "next/link";
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
@@ -48,6 +49,11 @@ export default function ServicesPage() {
             <p className="font-medium text-green-600">Status: {service.status}</p>
             <p className="text-lg font-bold mt-2">${service.price}</p>
             <p className="text-sm text-gray-500 mt-1">Provider: {service.user?.username}</p>
+            <Link href={`/service/${service.id}`}>
+              <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                View Details
+              </button>
+            </Link>
           </div>
         ))}
       </div>
