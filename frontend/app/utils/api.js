@@ -104,6 +104,27 @@ export const adminAPI = {
     return API.delete(`/users/admin/${userId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+  },
+
+  // Update user
+  updateUser: (userId, userData, token) => {
+    return API.put(`/users/${userId}`, userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get user by ID
+  getUserById: (userId, token) => {
+    return API.get(`/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Create user
+  createUser: (userData, token) => {
+    return API.post('/users', userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
   }
 };
 
