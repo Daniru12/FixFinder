@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { adminAPI } from '../../utils/api';
 
 export default function AdminServiceManagement() {
-  const { user, token } = useContext(AuthContext);
+  const { user, token, loading: authLoading } = useContext(AuthContext);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,12 +14,14 @@ export default function AdminServiceManagement() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || user.role !== 'ROLE_ADMIN') {
-      router.push('/login');
-      return;
+    if (!authLoading) {
+      if (!user || user.role !== 'ROLE_ADMIN') {
+        router.push('/login');
+        return;
+      }
+      loadServices();
     }
-    loadServices();
-  }, [user, router]);
+  }, [user, router, authLoading]);
 
   const loadServices = async () => {
     try {
@@ -72,6 +74,10 @@ export default function AdminServiceManagement() {
     setEditingService(null);
     setEditFormData({});
   };
+
+  if (authLoading) {
+    return <p className="text-center py-10">Loading...</p>;
+  }
 
   if (!user || user.role !== 'ROLE_ADMIN') {
     return <p className="text-center py-10">Checking access...</p>;

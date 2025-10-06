@@ -7,17 +7,28 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const savedToken = localStorage.getItem('token');
-  if (savedToken && savedToken.split('.').length === 3) {
-    setToken(savedToken);
-    const decoded = jwtDecode(savedToken);
-    setUser({ username: decoded.sub, role: decoded.role });
-  } else {
-    localStorage.removeItem('token'); // remove invalid token
-  }
-}, []);
+    const savedToken = localStorage.getItem('token');
+    if (savedToken && savedToken.split('.').length === 3) {
+      try {
+        const decoded = jwtDecode(savedToken);
+        // Check if token is expired
+        if (decoded.exp * 1000 > Date.now()) {
+          setToken(savedToken);
+          setUser({ username: decoded.sub, role: decoded.role });
+        } else {
+          localStorage.removeItem('token'); // remove expired token
+        }
+      } catch (error) {
+        localStorage.removeItem('token'); // remove invalid token
+      }
+    } else {
+      localStorage.removeItem('token'); // remove invalid token
+    }
+    setLoading(false);
+  }, []);
 
 
   const login = (jwtToken) => {
@@ -35,7 +46,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

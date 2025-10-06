@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { adminAPI } from '../../utils/api';
 
 export default function UserManagement() {
-  const { user, token } = useContext(AuthContext);
+  const { user, token, loading: authLoading } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,12 +16,14 @@ export default function UserManagement() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || user.role !== 'ROLE_ADMIN') {
-      router.push('/login');
-    } else {
-      fetchUsers();
+    if (!authLoading) {
+      if (!user || user.role !== 'ROLE_ADMIN') {
+        router.push('/login');
+      } else {
+        fetchUsers();
+      }
     }
-  }, [user, router]);
+  }, [user, router, authLoading]);
 
   const fetchUsers = async () => {
     try {
@@ -91,6 +93,10 @@ export default function UserManagement() {
     const matchesRole = filterRole === '' || u.role === filterRole;
     return matchesSearch && matchesRole;
   });
+
+  if (authLoading) {
+    return <p className="text-center py-10">Loading...</p>;
+  }
 
   if (!user || user.role !== 'ROLE_ADMIN') {
     return <p className="text-center py-10">Checking access...</p>;

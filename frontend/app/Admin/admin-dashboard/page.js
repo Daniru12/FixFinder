@@ -4,16 +4,22 @@ import { useRouter } from 'next/navigation';
 import { AuthContext } from '../../context/AuthContext';
 
 export default function AdminDashboard() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, loading } = useContext(AuthContext);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      router.push('../login');
-    } else if (user.role !== 'ROLE_ADMIN') {
-      router.push('/');
+    if (!loading) {
+      if (!user) {
+        router.push('../login');
+      } else if (user.role !== 'ROLE_ADMIN') {
+        router.push('/');
+      }
     }
-  }, [user, router]);
+  }, [user, router, loading]);
+
+  if (loading) {
+    return <p className="text-gray-500 mt-10 text-center">Loading...</p>;
+  }
 
   if (!user || user.role !== 'ROLE_ADMIN') {
     return <p className="text-gray-500 mt-10 text-center">Checking access...</p>;
