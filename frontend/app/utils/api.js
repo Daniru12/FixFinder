@@ -45,4 +45,21 @@ export const serviceAPI = {
   }
 };
 
+// User API functions
+export const userAPI = {
+  // Get user profile by username
+  getProfile: (username, token) => {
+    return API.get(`/users/profile/${username}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update availability
+  updateAvailability: (available, token) => {
+    return API.put('/users/provider/availability', { available }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};
+
 export default API;

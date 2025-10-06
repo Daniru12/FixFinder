@@ -57,6 +57,19 @@ public class UserController {
         }
     }
 
+    // Update availability for providers
+    @PutMapping("/provider/availability")
+    public ResponseEntity<User> updateAvailability(
+            @RequestBody AvailabilityRequest request,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal User user) {
+        try {
+            User updatedUser = userService.updateAvailability(user.getId(), request.isAvailable());
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // Delete user
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
@@ -65,6 +78,19 @@ public class UserController {
             return ResponseEntity.ok().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Inner class for availability request
+    public static class AvailabilityRequest {
+        private boolean available;
+
+        public boolean isAvailable() {
+            return available;
+        }
+
+        public void setAvailable(boolean available) {
+            this.available = available;
         }
     }
 }
