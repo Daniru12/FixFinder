@@ -62,4 +62,49 @@ export const userAPI = {
   }
 };
 
+// Admin API functions
+export const adminAPI = {
+  // Get all services for admin
+  getAllServices: (token) => {
+    return API.get('/services/admin/all', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Create service as admin
+  createService: (serviceData, token) => {
+    return API.post('/services/admin/add', serviceData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update service as admin
+  updateService: (serviceId, serviceData, token) => {
+    return API.put(`/services/admin/${serviceId}`, serviceData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete service as admin
+  deleteService: (serviceId, token) => {
+    return API.delete(`/services/admin/${serviceId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get all users
+  getAllUsers: (token) => {
+    return API.get('/users/admin', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete user
+  deleteUser: (userId, token) => {
+    return API.delete(`/users/admin/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};
+
 export default API;

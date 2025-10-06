@@ -2,6 +2,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { adminAPI } from '../../utils/api';
 
 export default function UserManagement() {
   const { user, token } = useContext(AuthContext);
@@ -18,29 +19,21 @@ export default function UserManagement() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:8080/users/admin', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      setUsers(data);
+      const response = await adminAPI.getAllUsers(token);
+      setUsers(response.data);
     } catch (err) {
       console.error('Error fetching users:', err);
     }
   };
 
   const handleDelete = async (id) => {
-    try {
-      await fetch(`http://localhost:8080/users/admin/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setUsers(users.filter(u => u.id !== id));
-    } catch (err) {
-      console.error('Error deleting user:', err);
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await adminAPI.deleteUser(id, token);
+        setUsers(users.filter(u => u.id !== id));
+      } catch (err) {
+        console.error('Error deleting user:', err);
+      }
     }
   };
 
