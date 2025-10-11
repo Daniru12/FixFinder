@@ -39,12 +39,31 @@ public class ServiceService {
     public AppService updateService(Long id, AppService updatedService, User user) {
         AppService existingService = getServiceById(id);
 
-        if (!existingService.getUser().getId().equals(user.getId())) {
+        // Check permissions: either the user owns the service or is an admin
+        if (!existingService.getUser().getId().equals(user.getId()) && 
+            !"ROLE_ADMIN".equals(user.getRole())) {
             throw new IllegalArgumentException("You don't have permission to update this service");
         }
 
-        existingService.setServiceName(updatedService.getServiceName());
-        // Add any other fields that need to be updated
+        // Update all fields
+        if (updatedService.getServiceName() != null && !updatedService.getServiceName().isBlank()) {
+            existingService.setServiceName(updatedService.getServiceName());
+        }
+        if (updatedService.getDescription() != null) {
+            existingService.setDescription(updatedService.getDescription());
+        }
+        if (updatedService.getPrice() != null) {
+            existingService.setPrice(updatedService.getPrice());
+        }
+        if (updatedService.getImages() != null) {
+            existingService.setImages(updatedService.getImages());
+        }
+        if (updatedService.getCategory() != null) {
+            existingService.setCategory(updatedService.getCategory());
+        }
+        if (updatedService.getStatus() != null) {
+            existingService.setStatus(updatedService.getStatus());
+        }
 
         return serviceRepository.save(existingService);
     }
@@ -53,7 +72,9 @@ public class ServiceService {
     public void deleteService(Long id, User user) {
         AppService service = getServiceById(id);
 
-        if (!service.getUser().getId().equals(user.getId())) {
+        // Check permissions: either the user owns the service or is an admin
+        if (!service.getUser().getId().equals(user.getId()) && 
+            !"ROLE_ADMIN".equals(user.getRole())) {
             throw new IllegalArgumentException("You don't have permission to delete this service");
         }
 

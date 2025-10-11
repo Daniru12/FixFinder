@@ -4,4 +4,128 @@ const API = axios.create({
   baseURL: 'http://localhost:8080', // Spring Boot backend
 });
 
+// Service API functions
+export const serviceAPI = {
+  // Get all services for current user
+  getMyServices: (token) => {
+    return API.get('/services/user/my-services', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Create a new service
+  createService: (serviceData, token) => {
+    return API.post('/services/provider/add', serviceData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update a service
+  updateService: (serviceId, serviceData, token) => {
+    return API.put(`/services/provider/${serviceId}`, serviceData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete a service
+  deleteService: (serviceId, token) => {
+    return API.delete(`/services/provider/${serviceId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get service by ID
+  getServiceById: (serviceId) => {
+    return API.get(`/services/user/${serviceId}`);
+  },
+
+  // Get all services (public)
+  getAllServices: () => {
+    return API.get('/services/user/all');
+  }
+};
+
+// User API functions
+export const userAPI = {
+  // Get user profile by username
+  getProfile: (username, token) => {
+    return API.get(`/users/profile/${username}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update availability
+  updateAvailability: (available, token) => {
+    return API.put('/users/provider/availability', { available }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};
+
+// Admin API functions
+export const adminAPI = {
+  // Get all services for admin
+  getAllServices: (token) => {
+    return API.get('/services/admin/all', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Create service as admin
+  createService: (serviceData, token) => {
+    return API.post('/services/admin/add', serviceData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update service as admin
+  updateService: (serviceId, serviceData, token) => {
+    return API.put(`/services/admin/${serviceId}`, serviceData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete service as admin
+  deleteService: (serviceId, token) => {
+    return API.delete(`/services/admin/${serviceId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get all users
+  getAllUsers: (token) => {
+    return API.get('/users/admin', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete user
+  deleteUser: (userId, token) => {
+    return API.delete(`/users/admin/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update user
+  updateUser: (userId, userData, token) => {
+    return API.put(`/users/${userId}`, userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get user by ID
+  getUserById: (userId, token) => {
+    return API.get(`/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Create user
+  createUser: (userData, token) => {
+    return API.post('/users', userData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};
+
 export default API;

@@ -1,8 +1,6 @@
 import './globals.css';
 import { AuthProvider } from './context/AuthContext';
-import Navbar from './components/Navbar';
-import Header from './components/Header';
-import Footer from './components/Footer';
+import ConditionalLayout from './components/ConditionalLayout';
 
 export const metadata = {
   title: 'FixFinder',
@@ -13,9 +11,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <AuthProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
         </AuthProvider>
       </body>
     </html>

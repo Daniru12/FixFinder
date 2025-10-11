@@ -2,6 +2,7 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { adminAPI } from '../../utils/api';
 
 export default function CreateUserPage() {
   const { user, token } = useContext(AuthContext);
@@ -25,21 +26,12 @@ export default function CreateUserPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch('http://localhost:8080/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: token ? `Bearer ${token}` : ''
-      },
-      body: JSON.stringify(form)
-    });
-
-    if (res.ok) {
+    try {
+      await adminAPI.createUser(form, token);
       alert('User created successfully');
       router.push('./users'); // redirect to users list
-    } else {
-      const err = await res.json();
-      alert('Error: ' + (err.message || 'Failed to create user'));
+    } catch (err) {
+      alert('Error: ' + (err.response?.data?.message || 'Failed to create user'));
     }
   };
 

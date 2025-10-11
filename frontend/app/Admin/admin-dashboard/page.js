@@ -4,16 +4,22 @@ import { useRouter } from 'next/navigation';
 import { AuthContext } from '../../context/AuthContext';
 
 export default function AdminDashboard() {
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, loading } = useContext(AuthContext);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user) {
-      router.push('../login');
-    } else if (user.role !== 'ROLE_ADMIN') {
-      router.push('/');
+    if (!loading) {
+      if (!user) {
+        router.push('../login');
+      } else if (user.role !== 'ROLE_ADMIN') {
+        router.push('/');
+      }
     }
-  }, [user, router]);
+  }, [user, router, loading]);
+
+  if (loading) {
+    return <p className="text-gray-500 mt-10 text-center">Loading...</p>;
+  }
 
   if (!user || user.role !== 'ROLE_ADMIN') {
     return <p className="text-gray-500 mt-10 text-center">Checking access...</p>;
@@ -27,21 +33,33 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <button
           onClick={() => router.push('./users')}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded shadow"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg shadow-lg transition-all hover:shadow-xl"
         >
-          User Management
+          <div className="text-center">
+            <div className="text-2xl mb-2">👥</div>
+            <div className="text-lg">User Management</div>
+            <div className="text-sm opacity-90">Manage all users</div>
+          </div>
         </button>
         <button
           onClick={() => router.push('./bookings')}
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded shadow"
+          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg shadow-lg transition-all hover:shadow-xl"
         >
-          Booking Management
+          <div className="text-center">
+            <div className="text-2xl mb-2">📅</div>
+            <div className="text-lg">Booking Management</div>
+            <div className="text-sm opacity-90">View all bookings</div>
+          </div>
         </button>
         <button
           onClick={() => router.push('./services')}
-          className="bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-4 rounded shadow"
+          className="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-4 px-6 rounded-lg shadow-lg transition-all hover:shadow-xl"
         >
-          Service Management
+          <div className="text-center">
+            <div className="text-2xl mb-2">🛠️</div>
+            <div className="text-lg">Service Management</div>
+            <div className="text-sm opacity-90">Edit & delete services</div>
+          </div>
         </button>
       </div>
 

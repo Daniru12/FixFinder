@@ -2,6 +2,7 @@
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '../../context/AuthContext'; // adjust path
+import { serviceAPI } from '../../utils/api';
 
 export default function CreateServicePage() {
   const { token } = useContext(AuthContext);
@@ -30,26 +31,14 @@ export default function CreateServicePage() {
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:8080/services/provider/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...formData,
-          price: parseFloat(formData.price),
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to create service');
-      }
-
-      await res.json();
+      await serviceAPI.createService({
+        ...formData,
+        price: parseFloat(formData.price),
+      }, token);
+      
       router.push('./providerServices'); // Redirect back after success
     } catch (err) {
-      setError(err.message);
+      setError(err.response?.data?.message || 'Failed to create service');
     } finally {
       setLoading(false);
     }

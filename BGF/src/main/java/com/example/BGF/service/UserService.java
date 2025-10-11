@@ -66,6 +66,15 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    // Update availability only
+    public User updateAvailability(Long userId, boolean available) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        
+        user.setAvailable(available);
+        return userRepository.save(user);
+    }
+
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return encoder.matches(rawPassword, encodedPassword);
     }

@@ -46,6 +46,12 @@ public class ServiceController {
         return ResponseEntity.ok(serviceService.getServicesByUser(user));
     }
 
+    // Admin get all services
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<AppService>> getAllServicesForAdmin(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(serviceService.getAllServices());
+    }
+
     // Update
     @PutMapping("/admin/{id}")
     public ResponseEntity<AppService> updateService(
@@ -53,6 +59,22 @@ public class ServiceController {
             @RequestBody AppService service,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(serviceService.updateService(id, service, user));
+    }
+
+    // Update (Provider)
+    @PutMapping("/provider/{id}")
+    public ResponseEntity<AppService> updateServiceByProvider(
+            @PathVariable Long id,
+            @RequestBody AppService service,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(serviceService.updateService(id, service, user));
+    }
+
+    // Delete (Provider)
+    @DeleteMapping("/provider/{id}")
+    public ResponseEntity<Void> deleteServiceByProvider(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        serviceService.deleteService(id, user);
+        return ResponseEntity.ok().build();
     }
 
     // Delete
