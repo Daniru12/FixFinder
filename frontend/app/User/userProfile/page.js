@@ -68,7 +68,11 @@ export default function ProfilePage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...profile,
+          username: profile.username,
+          email: profile.email,
+          role: profile.role,
+          serviceType: profile.serviceType,
+          available: profile.available,
           fullName: editForm.fullName,
           address: editForm.address,
           phone: editForm.phone

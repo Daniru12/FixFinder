@@ -72,7 +72,10 @@ export default function ProviderDashboard() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...profile,
+          username: profile.username,
+          email: profile.email,
+          role: profile.role,
+          available: profile.available,
           fullName: editForm.fullName,
           address: editForm.address,
           phone: editForm.phone,
