@@ -9,6 +9,14 @@ export default function ProviderDashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: '',
+    address: '',
+    phone: '',
+    serviceType: ''
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -24,10 +32,75 @@ export default function ProviderDashboard() {
     try {
       const response = await userAPI.getProfile(user.username, token);
       setProfile(response.data);
+      setEditForm({
+        fullName: response.data.fullName || '',
+        address: response.data.address || '',
+        phone: response.data.phone || '',
+        serviceType: response.data.serviceType || ''
+      });
     } catch (err) {
       console.error('Failed to fetch profile:', err);
       setError('Failed to load profile');
     }
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditForm({
+      fullName: profile.fullName || '',
+      address: profile.address || '',
+      phone: profile.phone || '',
+      serviceType: profile.serviceType || ''
+    });
+  };
+
+  const handleSave = async () => {
+    if (!profile?.id || !token) return;
+    
+    setIsUpdating(true);
+    setError(null);
+    
+    try {
+      const response = await fetch(`http://localhost:8080/users/${profile.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...profile,
+          fullName: editForm.fullName,
+          address: editForm.address,
+          phone: editForm.phone,
+          serviceType: editForm.serviceType
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const updatedProfile = await response.json();
+      setProfile(updatedProfile);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setError('Failed to update profile. Please try again.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleAvailabilityToggle = async () => {
@@ -60,10 +133,22 @@ export default function ProviderDashboard() {
     <div className="max-w-6xl mx-auto p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Provider Dashboard
-        </h1>
-        <p className="text-gray-600">Welcome, {profile.fullName || user.username}</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Provider Dashboard
+            </h1>
+            <p className="text-gray-600">Welcome, {profile.fullName || user.username}</p>
+          </div>
+          {!isEditing && (
+            <button
+              onClick={handleEdit}
+              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+            >
+              Edit Profile
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Error Message */}
@@ -107,12 +192,78 @@ export default function ProviderDashboard() {
       <div className="p-6 bg-white shadow rounded-xl mb-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Provider Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <p><span className="font-medium">Username:</span> {profile.username}</p>
-          <p><span className="font-medium">Full Name:</span> {profile.fullName}</p>
-          <p><span className="font-medium">Email:</span> {profile.email}</p>
-          <p><span className="font-medium">Phone:</span> {profile.phone}</p>
-          <p><span className="font-medium">Service Type:</span> {profile.serviceType}</p>
-          <p><span className="font-medium">Address:</span> {profile.address}</p>
+          <div>
+            <span className="font-medium">Username:</span> {profile.username}
+          </div>
+          
+          <div>
+            <span className="font-medium">Full Name:</span>
+            {isEditing ? (
+              <input
+                type="text"
+                name="fullName"
+                value={editForm.fullName}
+                onChange={handleInputChange}
+                className="ml-2 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Enter full name"
+              />
+            ) : (
+              <span className="ml-2">{profile.fullName}</span>
+            )}
+          </div>
+          
+          <div>
+            <span className="font-medium">Email:</span> {profile.email}
+          </div>
+          
+          <div>
+            <span className="font-medium">Phone:</span>
+            {isEditing ? (
+              <input
+                type="text"
+                name="phone"
+                value={editForm.phone}
+                onChange={handleInputChange}
+                className="ml-2 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Enter phone number"
+              />
+            ) : (
+              <span className="ml-2">{profile.phone}</span>
+            )}
+          </div>
+          
+          <div>
+            <span className="font-medium">Service Type:</span>
+            {isEditing ? (
+              <input
+                type="text"
+                name="serviceType"
+                value={editForm.serviceType}
+                onChange={handleInputChange}
+                className="ml-2 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Enter service type"
+              />
+            ) : (
+              <span className="ml-2">{profile.serviceType}</span>
+            )}
+          </div>
+          
+          <div>
+            <span className="font-medium">Address:</span>
+            {isEditing ? (
+              <input
+                type="text"
+                name="address"
+                value={editForm.address}
+                onChange={handleInputChange}
+                className="ml-2 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
+                placeholder="Enter address"
+              />
+            ) : (
+              <span className="ml-2">{profile.address}</span>
+            )}
+          </div>
+          
           <div className="flex items-center">
             <span className="font-medium">Status:</span>
             <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
@@ -124,6 +275,26 @@ export default function ProviderDashboard() {
             </span>
           </div>
         </div>
+        
+        {/* Action Buttons */}
+        {isEditing && (
+          <div className="flex gap-2 mt-6 pt-4 border-t border-gray-200">
+            <button
+              onClick={handleSave}
+              disabled={isUpdating}
+              className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+            >
+              {isUpdating ? 'Saving...' : 'Save Changes'}
+            </button>
+            <button
+              onClick={handleCancel}
+              disabled={isUpdating}
+              className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Quick Stats */}
