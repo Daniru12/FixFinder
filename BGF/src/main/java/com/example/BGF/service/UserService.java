@@ -45,9 +45,16 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
         
         user.setUsername(userDetails.getUsername());
+        
+        // Only update password if it's provided and not already hashed
         if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-            user.setPassword(encoder.encode(userDetails.getPassword()));
+            // Check if password is already hashed (BCrypt hashes start with $2a$ or $2b$)
+            if (!userDetails.getPassword().startsWith("$2a$") && !userDetails.getPassword().startsWith("$2b$")) {
+                user.setPassword(encoder.encode(userDetails.getPassword()));
+            }
+            // If password is already hashed, don't re-encrypt it
         }
+        
         user.setEmail(userDetails.getEmail());
         user.setFullName(userDetails.getFullName());
         user.setRole(userDetails.getRole());
@@ -77,5 +84,14 @@ public class UserService {
 
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return encoder.matches(rawPassword, encodedPassword);
+    }
+
+    // Update password only
+    public User updatePassword(Long id, String newPassword) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        
+        user.setPassword(encoder.encode(newPassword));
+        return userRepository.save(user);
     }
 }
