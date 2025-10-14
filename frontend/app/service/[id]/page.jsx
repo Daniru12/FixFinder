@@ -1,12 +1,14 @@
 "use client";
 import { use, useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation"; // 👈 Add this
 
 export default function ServiceDetailsPage({ params }) {
   const { id } = use(params);
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter(); // 👈 Initialize router
 
   useEffect(() => {
     if (!id) return;
@@ -30,6 +32,14 @@ export default function ServiceDetailsPage({ params }) {
         setLoading(false);
       });
   }, [id]);
+
+  const handleBookNow = () => {
+    router.push(`/Booking/${id}`);
+  };
+
+  const handleWriteReview = () => {
+    router.push(`/review/${id}`);
+  };
 
   if (loading) {
     return (
@@ -129,13 +139,10 @@ export default function ServiceDetailsPage({ params }) {
 
             {/* Details Grid */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">
-              {/* Service ID */}
               <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-5 border border-teal-100">
                 <p className="text-teal-600 text-sm font-semibold mb-1 uppercase tracking-wide">ID</p>
                 <p className="text-gray-800 font-mono text-lg">{service.id}</p>
               </div>
-
-              {/* Category */}
               <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-5 border border-teal-100">
                 <p className="text-teal-600 text-sm font-semibold mb-1 uppercase tracking-wide">Category</p>
                 <p className="text-gray-800 text-lg font-medium">{service.category}</p>
@@ -155,7 +162,7 @@ export default function ServiceDetailsPage({ params }) {
 
             {/* Provider Info */}
             {service.user && (
-              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl p-6 text-white">
+              <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl p-6 text-white mb-6">
                 <h3 className="font-bold text-lg mb-3 flex items-center">
                   <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3 backdrop-blur-sm">
                     👤
@@ -167,6 +174,22 @@ export default function ServiceDetailsPage({ params }) {
                 </p>
               </div>
             )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              <button
+                onClick={handleBookNow}
+                className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-teal-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
+              >
+                📅 Book Now
+              </button>
+              <button
+                onClick={handleWriteReview}
+                className="flex-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-gray-800 hover:to-black transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"
+              >
+                ✍️ Write a Review
+              </button>
+            </div>
           </div>
         </div>
       </div>
