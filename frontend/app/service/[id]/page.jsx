@@ -1,30 +1,128 @@
 "use client";
 import { use, useEffect, useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation"; // 👈 Add this
+import { useRouter } from "next/navigation";
+
+const ReviewFormModal = ({ isOpen, onClose, serviceId, onReviewAdded }) => {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    try {
+      await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/reviews`,
+        {
+          serviceId,
+          rating,
+          comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      onReviewAdded();
+      onClose();
+    } catch (error) {
+      console.error("Error adding review:", error);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">Write a Review</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Rating</label>
+            <select
+              value={rating}
+              onChange={(e) => setRating(Number(e.target.value))}
+              className="w-full border rounded p-2"
+            >
+              {[5, 4, 3, 2, 1].map((num) => (
+                <option key={num} value={num}>
+                  {num} Stars
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2">Comment</label>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full border rounded p-2"
+              rows="4"
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-200 rounded"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-teal-600 text-white rounded"
+            >
+              Submit Review
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 export default function ServiceDetailsPage({ params }) {
   const { id } = use(params);
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const router = useRouter(); // 👈 Initialize router
+  const router = useRouter();
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/reviews/service/${id}`
+      );
+      setReviews(response.data);
+      const avg = response.data.reduce((acc, review) => acc + review.rating, 0) / response.data.length;
+      setAverageRating(avg || 0);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    axios
-      .get(
+    Promise.all([
+      axios.get(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/services/user/${id}`,
         {
           headers: {
             Authorization: token ? `Bearer ${token}` : undefined,
           },
         }
-      )
-      .then((res) => {
-        setService(res.data);
+      ),
+      fetchReviews(),
+    ])
+      .then(([serviceRes]) => {
+        setService(serviceRes.data);
         setLoading(false);
       })
       .catch((err) => {
@@ -37,10 +135,12 @@ export default function ServiceDetailsPage({ params }) {
     router.push(`/Booking/${id}`);
   };
 
-  const handleWriteReview = () => {
-    router.push(`/review/${id}`);
+const handleWriteReview = () => {
+    router.push(`/review?serviceId=${id}`);
   };
 
+
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center">
@@ -51,6 +151,7 @@ export default function ServiceDetailsPage({ params }) {
       </div>
     );
   }
+
 
   if (error) {
     return (
@@ -68,6 +169,7 @@ export default function ServiceDetailsPage({ params }) {
     );
   }
 
+ 
   if (!service) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center p-4">
@@ -135,6 +237,34 @@ export default function ServiceDetailsPage({ params }) {
                   <span className="text-3xl">💰</span>
                 </div>
               </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="bg-white rounded-xl p-6 mb-6 border border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold">Reviews</h3>
+                <div className="flex items-center">
+                  <span className="text-2xl font-bold text-teal-600">{averageRating.toFixed(1)}</span>
+                  <span className="text-yellow-400 ml-2">★</span>
+                </div>
+              </div>
+              {reviews.length === 0 ? (
+                <p className="text-gray-500">No reviews yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border-b pb-4">
+                      <div className="flex items-center mb-2">
+                        <div className="text-yellow-400">{'★'.repeat(review.rating)}</div>
+                        <span className="ml-2 text-gray-600">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-gray-700">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Details Grid */}
