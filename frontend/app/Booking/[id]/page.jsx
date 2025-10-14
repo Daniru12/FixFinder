@@ -1,57 +1,98 @@
 'use client';
 
 import { useState, useEffect, useContext } from "react";
-import { ChevronRight, ChevronLeft, User, Calendar, CreditCard, CheckCircle, XCircle, Users, FileText, Clock } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import {
+  ChevronRight,
+  ChevronLeft,
+  User,
+  Calendar,
+  CreditCard,
+  CheckCircle,
+  XCircle,
+  Users,
+  FileText,
+  Clock
+} from "lucide-react";
 import { AuthContext } from '../../context/AuthContext';
 
 export default function EnhancedBookingForm() {
+  const params = useParams();
+  const serviceIdFromUrl = params?.id;
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [serviceId, setServiceId] = useState("");
-  const [services, setServices] = useState([
-    { id: 1, name: "Water Pipe Repair", price: 2500, description: "Complete water pipe repair and maintenance", duration: "2-3 hours" },
-    { id: 2, name: "Electrical Work", price: 3500, description: "Electrical installation and repair services", duration: "3-4 hours" },
-    { id: 3, name: "House Cleaning", price: 4500, description: "Deep cleaning service for your home", duration: "4-5 hours" },
-    { id: 4, name: "Plumbing Service", price: 3000, description: "Professional plumbing solutions", duration: "2-3 hours" },
-    { id: 5, name: "AC Maintenance", price: 2800, description: "Air conditioning service and repair", duration: "1-2 hours" },
-    { id: 6, name: "Garden Care", price: 2200, description: "Landscaping and garden maintenance", duration: "3-4 hours" },
-  ]);
+  const [service, setService] = useState(null); // Holds fetched service
   const [scheduledDate, setScheduledDate] = useState("");
   const [status, setStatus] = useState("PENDING");
   const [totalPrice, setTotalPrice] = useState(0);
   const [loading, setLoading] = useState(false);
   const [bookingResult, setBookingResult] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [serviceLoading, setServiceLoading] = useState(true);
+  const [serviceError, setServiceError] = useState(null);
 
   const router = useRouter();
   const { user, token } = useContext(AuthContext);
 
+  // ✅ Real customer ID — no fallback
+  const customerId = user?.id;
+
   const steps = [
-    { number: 1, title: "Service Selection", icon: FileText, description: "Choose your service" },
+    { number: 1, title: "Service Selection", icon: FileText, description: "Confirm your service" },
     { number: 2, title: "Schedule Booking", icon: Calendar, description: "Set date and time" },
     { number: 3, title: "Review Details", icon: CreditCard, description: "Confirm your booking" },
     { number: 4, title: "Confirmation", icon: CheckCircle, description: "Booking complete" },
   ];
 
-  const customerId = user?.id || 3;
-
+  // 🔁 Fetch service by ID on mount
   useEffect(() => {
-    const selected = services.find((s) => String(s.id) === String(serviceId));
-    if (selected) setTotalPrice(selected.price || 0);
-  }, [serviceId, services]);
+    if (!serviceIdFromUrl || !token) {
+      setServiceLoading(false);
+      return;
+    }
+
+    const fetchService = async () => {
+      setServiceLoading(true);
+      setServiceError(null);
+      try {
+        const res = await fetch(
+          `http://localhost:8080/services/user/${serviceIdFromUrl}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          throw new Error(`Failed to load service: ${res.status} ${res.statusText}`);
+        }
+
+        const serviceData = await res.json();
+        setService(serviceData);
+        setTotalPrice(serviceData.price || 0);
+        setCurrentStep(2); // Auto-advance to scheduling
+      } catch (err) {
+        console.error("Service fetch error:", err);
+        setServiceError(err.message || "Unable to load service details.");
+      } finally {
+        setServiceLoading(false);
+      }
+    };
+
+    fetchService();
+  }, [serviceIdFromUrl, token]);
 
   const showToast = (message, type = "info") => {
     setToast({ show: true, message, type });
     setTimeout(() => setToast({ show: false, message: "", type: "" }), 4000);
   };
 
-  const getSelectedService = () => services.find(s => String(s.id) === String(serviceId));
-
   const canProceedToStep = (step) => {
     switch (step) {
-      case 2: return serviceId;
-      case 3: return serviceId && scheduledDate;
-      case 4: return serviceId && scheduledDate;
+      case 2: return service;
+      case 3: return service && scheduledDate;
+      case 4: return service && scheduledDate;
       default: return true;
     }
   };
@@ -69,23 +110,21 @@ export default function EnhancedBookingForm() {
   };
 
   const handleSubmit = async () => {
-    if (!customerId || !serviceId || !scheduledDate || !token) {
+    if (!customerId || !service?.id || !scheduledDate || !token) {
       showToast("You must be logged in and fill all fields to book.", "error");
       return;
     }
 
-    // Format dates to "YYYY-MM-DDTHH:mm:ss" (no milliseconds, no timezone)
     const bookingDate = new Date().toISOString().slice(0, 19);
     const scheduledDateFormatted = new Date(scheduledDate).toISOString().slice(0, 19);
 
-    // ✅ EXACT JSON FORMAT REQUIRED BY BACKEND
     const bookingPayload = {
       customer: { id: customerId },
-      service: { id: Number(serviceId) },
+      service: { id: service.id },
       bookingDate: bookingDate,
       scheduledDate: scheduledDateFormatted,
       status: status,
-      totalPrice: Number(totalPrice)
+      totalPrice: Number(service.price)
     };
 
     setLoading(true);
@@ -128,17 +167,66 @@ export default function EnhancedBookingForm() {
 
   const resetForm = () => {
     setCurrentStep(1);
-    setServiceId("");
     setScheduledDate("");
     setStatus("PENDING");
-    setTotalPrice(0);
     setBookingResult(null);
+    // Re-fetch service if needed
   };
 
   const navigateToBookings = () => {
     showToast("Navigating to all bookings...", "info");
-    router.push("/Booking/Bookings"); 
+    router.push("/Booking/Bookings");
   };
+
+  // 🟡 Loading service
+  if (serviceLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-700">Loading service details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 🔴 Service fetch error
+  if (serviceError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-lg p-6 max-w-md text-center border border-red-200">
+          <XCircle className="text-red-500 mx-auto mb-3" size={48} />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Failed to Load Service</h2>
+          <p className="text-gray-600 mb-4">{serviceError}</p>
+          <button
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 🟢 Service not found
+  if (!service) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-lg p-6 max-w-md text-center">
+          <FileText className="text-gray-400 mx-auto mb-3" size={48} />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Service Not Found</h2>
+          <p className="text-gray-600">The requested service could not be found.</p>
+          <button
+            onClick={() => router.push("/")}
+            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          >
+            Browse Services
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -235,45 +323,23 @@ export default function EnhancedBookingForm() {
             </div>
           )}
 
-          {/* Step 1: Service Selection */}
+          {/* Step 1: Service Confirmation (auto-skipped, but kept for UX clarity) */}
           {currentStep === 1 && (
             <div className="p-8">
               <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Service</h2>
-                <p className="text-gray-600">Choose the service you need</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Confirm Service</h2>
+                <p className="text-gray-600">You're about to book the following service:</p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {services.map((service) => (
-                  <div
-                    key={service.id}
-                    className={`cursor-pointer p-6 border-2 rounded-lg transition-all duration-200 ${
-                      String(service.id) === String(serviceId)
-                        ? 'border-blue-600 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
-                    onClick={() => setServiceId(String(service.id))}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{service.name}</h3>
-                        <p className="text-gray-600 text-sm mb-2">{service.description}</p>
-                        <div className="flex items-center text-gray-500 text-xs">
-                          <Clock size={14} className="mr-1" />
-                          <span>{service.duration}</span>
-                        </div>
-                      </div>
-                      <div className="text-right ml-4">
-                        <p className="text-xl font-bold text-gray-900">LKR {service.price}</p>
-                      </div>
-                    </div>
-                    <div className={`w-4 h-4 rounded-full border-2 ${
-                      String(service.id) === String(serviceId)
-                        ? 'bg-blue-600 border-blue-600'
-                        : 'border-gray-300'
-                    }`} />
-                  </div>
-                ))}
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-2xl mx-auto">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{service.name}</h3>
+                <p className="text-gray-700 mb-3">{service.description}</p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 flex items-center">
+                    <Clock size={14} className="mr-1" /> {service.duration || "N/A"}
+                  </span>
+                  <span className="text-xl font-bold text-gray-900">LKR {service.price}</span>
+                </div>
               </div>
             </div>
           )}
@@ -285,7 +351,7 @@ export default function EnhancedBookingForm() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Schedule Booking</h2>
                 <p className="text-gray-600">Select your preferred date and time</p>
               </div>
-              
+
               <div className="max-w-md mx-auto space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -300,7 +366,7 @@ export default function EnhancedBookingForm() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <select
@@ -325,7 +391,7 @@ export default function EnhancedBookingForm() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Review Booking</h2>
                 <p className="text-gray-600">Please confirm your booking details</p>
               </div>
-              
+
               <div className="bg-gray-50 rounded-lg p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-6">
@@ -339,26 +405,26 @@ export default function EnhancedBookingForm() {
                           <p className="font-medium text-gray-800">{user.name || user.username}</p>
                           <p className="text-gray-600">{user.email}</p>
                           <p className="text-gray-600">{user.phone || user.contact || "N/A"}</p>
-                          <p className="text-gray-600 font-mono">ID: {user.id || 3}</p>
+                          <p className="text-gray-600 font-mono">ID: {user.id}</p>
                         </div>
                       )}
                     </div>
-                    
+
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
                         <FileText className="mr-2 text-blue-600" size={18} />
                         Service Details
                       </h3>
-                      {getSelectedService() && (
-                        <div className="space-y-1 text-sm">
-                          <p className="font-medium text-gray-800">{getSelectedService().name}</p>
-                          <p className="text-gray-600">{getSelectedService().description}</p>
-                          <p className="text-gray-600">Duration: {getSelectedService().duration}</p>
-                        </div>
-                      )}
+                      <div className="space-y-1 text-sm">
+                        <p className="font-medium text-gray-800">{service.name}</p>
+                        <p className="text-gray-600">{service.description}</p>
+                        {service.duration && (
+                          <p className="text-gray-600">Duration: {service.duration}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
@@ -379,14 +445,14 @@ export default function EnhancedBookingForm() {
                         <p className="text-gray-600">Status: {status}</p>
                       </div>
                     </div>
-                    
+
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
                         <CreditCard className="mr-2 text-blue-600" size={18} />
                         Payment
                       </h3>
                       <div className="space-y-1">
-                        <p className="text-2xl font-bold text-gray-900">LKR {totalPrice}</p>
+                        <p className="text-2xl font-bold text-gray-900">LKR {service.price}</p>
                         <p className="text-sm text-gray-600">Payment due upon service completion</p>
                       </div>
                     </div>
@@ -427,7 +493,7 @@ export default function EnhancedBookingForm() {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8 max-w-md mx-auto">
                 <button
                   onClick={navigateToBookings}
