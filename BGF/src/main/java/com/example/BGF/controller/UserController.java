@@ -70,6 +70,17 @@ public class UserController {
         }
     }
 
+    // Update password
+    @PutMapping("/{id}/password")
+    public ResponseEntity<?> updatePassword(@PathVariable Long id, @RequestBody PasswordRequest request) {
+        try {
+            User updatedUser = userService.updatePassword(id, request.getNewPassword());
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // Delete user
     @DeleteMapping("/admin/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
@@ -91,6 +102,19 @@ public class UserController {
 
         public void setAvailable(boolean available) {
             this.available = available;
+        }
+    }
+
+    // Inner class for password request
+    public static class PasswordRequest {
+        private String newPassword;
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
         }
     }
 }

@@ -20,9 +20,88 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: '',
+    isValid: false
+  });
+
+  // Password strength checker
+  const checkPasswordStrength = (password) => {
+    let score = 0;
+    let feedback = [];
+    
+    if (password.length === 0) {
+      return { score: 0, feedback: '', isValid: false };
+    }
+    
+    // Length check
+    if (password.length >= 8) {
+      score += 1;
+    } else {
+      feedback.push('At least 8 characters');
+    }
+    
+    // Lowercase check
+    if (/[a-z]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Lowercase letter');
+    }
+    
+    // Uppercase check
+    if (/[A-Z]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Uppercase letter');
+    }
+    
+    // Number check
+    if (/\d/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Number');
+    }
+    
+    // Special character check
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      score += 1;
+    } else {
+      feedback.push('Special character');
+    }
+    
+    // Determine strength level
+    let strengthText = '';
+    let isValid = false;
+    
+    if (score <= 2) {
+      strengthText = 'Weak';
+    } else if (score === 3) {
+      strengthText = 'Fair';
+    } else if (score === 4) {
+      strengthText = 'Good';
+      isValid = true;
+    } else if (score === 5) {
+      strengthText = 'Strong';
+      isValid = true;
+    }
+    
+    return {
+      score,
+      feedback: feedback.length > 0 ? `Missing: ${feedback.join(', ')}` : '',
+      isValid,
+      strengthText
+    };
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    
+    // Check password strength when password changes
+    if (e.target.name === 'password') {
+      const strength = checkPasswordStrength(e.target.value);
+      setPasswordStrength(strength);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -30,6 +109,13 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError('');
     setSuccess('');
+
+    // Check password strength before submission
+    if (form.password && !passwordStrength.isValid) {
+      setError('Password is too weak. Please make it stronger.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const res = await API.post('/auth/register', form);
@@ -159,6 +245,73 @@ export default function RegisterPage() {
                 required
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200"
               />
+              
+              {/* Password Strength Indicator */}
+              {form.password && (
+                <div className="mt-2 space-y-2">
+                  {/* Strength Bar */}
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                          level <= passwordStrength.score
+                            ? passwordStrength.score <= 2
+                              ? 'bg-red-400'
+                              : passwordStrength.score === 3
+                              ? 'bg-yellow-400'
+                              : passwordStrength.score === 4
+                              ? 'bg-blue-400'
+                              : 'bg-green-400'
+                            : 'bg-gray-200'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Strength Text and Feedback */}
+                  <div className="flex items-center justify-between text-xs">
+                    <span className={`font-medium ${
+                      passwordStrength.score <= 2
+                        ? 'text-red-600'
+                        : passwordStrength.score === 3
+                        ? 'text-yellow-600'
+                        : passwordStrength.score === 4
+                        ? 'text-blue-600'
+                        : 'text-green-600'
+                    }`}>
+                      {passwordStrength.strengthText || 'Enter password'}
+                    </span>
+                    {passwordStrength.feedback && (
+                      <span className="text-gray-500 text-xs">
+                        {passwordStrength.feedback}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Password Requirements */}
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p className="font-medium">Password must contain:</p>
+                    <ul className="list-disc list-inside space-y-0.5 ml-2">
+                      <li className={form.password.length >= 8 ? 'text-green-600' : 'text-gray-400'}>
+                        At least 8 characters
+                      </li>
+                      <li className={/[a-z]/.test(form.password) ? 'text-green-600' : 'text-gray-400'}>
+                        One lowercase letter
+                      </li>
+                      <li className={/[A-Z]/.test(form.password) ? 'text-green-600' : 'text-gray-400'}>
+                        One uppercase letter
+                      </li>
+                      <li className={/\d/.test(form.password) ? 'text-green-600' : 'text-gray-400'}>
+                        One number
+                      </li>
+                      <li className={/[!@#$%^&*(),.?":{}|<>]/.test(form.password) ? 'text-green-600' : 'text-gray-400'}>
+                        One special character
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Role */}
@@ -220,7 +373,7 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={isLoading || (form.password && !passwordStrength.isValid)}
               className="w-full py-3 px-6 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg"
             >
               {isLoading ? (
