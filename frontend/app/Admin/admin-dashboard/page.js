@@ -76,6 +76,19 @@ export default function AdminDashboard() {
       gradient: 'from-cyan-500 to-teal-600',
       hoverGradient: 'hover:from-cyan-600 hover:to-teal-700',
       stats: 'Configure'
+    },
+    {
+      title: 'Product Management',
+      description: 'View & Edit all products',
+      icon: (
+        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      ),
+      route: './products',
+      gradient: 'from-purple-500 to-indigo-600',
+      hoverGradient: 'hover:from-purple-600 hover:to-indigo-700',
+      stats: 'View & Edit'
     }
   ];
 
@@ -115,7 +128,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {dashboardCards.map((card, index) => (
             <div
               key={index}

@@ -195,3 +195,30 @@ export const bookingAPI = {
 };
 
 export default API;
+ 
+// Product API functions
+export const productAPI = {
+  // Public: list all active products
+  getAll: () => API.get('/products'),
+
+  // Public: get product by id
+  getById: (id) => API.get(`/products/${id}`),
+
+  // Provider/Admin: create product
+  create: (product, token) =>
+    API.post('/products/create', product, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // Owner/Admin: update product
+  update: (id, product, token) =>
+    API.put(`/products/${id}`, product, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // Owner/Admin: delete product
+  remove: (id, token) =>
+    API.delete(`/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+};
