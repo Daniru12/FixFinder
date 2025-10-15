@@ -22,7 +22,26 @@ public class BookingService {
     }
 
     public Booking createBooking(Booking booking) {
+        // Validate required fields
+        if (booking.getCustomer() == null || booking.getCustomer().getId() == null) {
+            throw new IllegalArgumentException("Customer is required for booking");
+        }
+        if (booking.getService() == null || booking.getService().getId() == null) {
+            throw new IllegalArgumentException("Service is required for booking");
+        }
+        if (booking.getScheduledDate() == null) {
+            throw new IllegalArgumentException("Scheduled date is required for booking");
+        }
+        
+        // Set default values
         booking.setStatus("PENDING"); // default status
+        booking.setBookingDate(java.time.LocalDateTime.now()); // current timestamp
+        
+        // Set total price from service if not provided
+        if (booking.getTotalPrice() == null && booking.getService().getPrice() != null) {
+            booking.setTotalPrice(booking.getService().getPrice());
+        }
+        
         return bookingRepository.save(booking);
     }
 
@@ -36,11 +55,11 @@ public class BookingService {
 
         String role = user.getRole();
 
-        if ("CUSTOMER".equalsIgnoreCase(role)) {
+        if ("CUSTOMER".equalsIgnoreCase(role) || "ROLE_USER".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role)) {
             return bookingRepository.findByCustomerId(user.getId());
-        } else if ("PROVIDER".equalsIgnoreCase(role)) {
+        } else if ("PROVIDER".equalsIgnoreCase(role) || "ROLE_PROVIDER".equalsIgnoreCase(role)) {
             return bookingRepository.findByServiceUserId(user.getId());
-        } else if ("ADMIN".equalsIgnoreCase(role)) {
+        } else if ("ADMIN".equalsIgnoreCase(role) || "ROLE_ADMIN".equalsIgnoreCase(role)) {
             return bookingRepository.findAll();
         } else {
             throw new IllegalStateException("Unsupported role: " + role);
@@ -51,7 +70,7 @@ public class BookingService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-        if (!"PROVIDER".equalsIgnoreCase(user.getRole())) {
+        if (!"PROVIDER".equalsIgnoreCase(user.getRole()) && !"ROLE_PROVIDER".equalsIgnoreCase(user.getRole())) {
             throw new RuntimeException("Unauthorized: Only providers can access this");
         }
 
@@ -76,11 +95,11 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         // Only provider of the service or admin can remove
-        if (user.getRole().equalsIgnoreCase("PROVIDER")) {
+        if (user.getRole().equalsIgnoreCase("PROVIDER") || user.getRole().equalsIgnoreCase("ROLE_PROVIDER")) {
             if (!booking.getService().getUser().getId().equals(user.getId())) {
                 throw new RuntimeException("Cannot remove booking of another provider");
             }
-        } else if (!user.getRole().equalsIgnoreCase("ADMIN")) {
+        } else if (!user.getRole().equalsIgnoreCase("ADMIN") && !user.getRole().equalsIgnoreCase("ROLE_ADMIN")) {
             throw new RuntimeException("Unauthorized");
         }
 

@@ -128,4 +128,70 @@ export const adminAPI = {
   }
 };
 
+// Booking API functions
+export const bookingAPI = {
+  // Create a new booking
+  createBooking: (bookingData, token) => {
+    return API.post('/api/bookings/add', bookingData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get all bookings for current user
+  getMyBookings: (token) => {
+    return API.get('/api/bookings/my', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get bookings for provider
+  getProviderBookings: (token) => {
+    return API.get('/api/bookings/provider', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get booking by ID
+  getBookingById: (bookingId, token) => {
+    return API.get(`/api/bookings/${bookingId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update booking status
+  updateBookingStatus: (bookingId, status, token) => {
+    return API.put(`/api/bookings/confirm/${bookingId}`, { status }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update booking
+  updateBooking: (bookingId, bookingData, token) => {
+    return API.put(`/api/bookings/${bookingId}`, bookingData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete booking
+  deleteBooking: (bookingId, token) => {
+    return API.delete(`/api/bookings/${bookingId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get bookings by customer
+  getBookingsByCustomer: (customerId, token) => {
+    return API.get(`/api/bookings/customer/${customerId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get bookings by service
+  getBookingsByService: (serviceId, token) => {
+    return API.get(`/api/bookings/service/${serviceId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};
+
 export default API;

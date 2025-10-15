@@ -1,38 +1,29 @@
 'use client';
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Search, Filter, Calendar, User, Package, Clock, DollarSign, CheckCircle, XCircle, Edit, Trash2, Eye } from "lucide-react";
+import { AuthContext } from '../../context/AuthContext';
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [dateFilter, setDateFilter] = useState("ALL");
   const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table'
 
-  const token = localStorage.getItem("token"); // JWT token
+  const { user, token } = useContext(AuthContext);
 
   useEffect(() => {
-    if (!token) {
-      console.error("No token found, please login first.");
+    if (!token || !user) {
+      console.error("No token or user found, please login first.");
       setError("Please login to view your bookings.");
       setLoading(false);
       return;
     }
 
-    // Decode token to get role (simple base64 decode of JWT payload)
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      setRole(payload.role || "");
-    } catch (err) {
-      console.error("Failed to parse token:", err);
-      setError("Invalid authentication token. Please login again.");
-      setLoading(false);
-      return;
-    }
+    console.log("BookingsPage - User:", user, "Role:", user?.role);
 
     // Fetch bookings for the logged-in user
     fetch("http://localhost:8080/api/bookings/my", {
@@ -63,7 +54,7 @@ export default function BookingsPage() {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, user]);
 
   // Filter and search functionality
   useEffect(() => {
@@ -386,7 +377,7 @@ export default function BookingsPage() {
                 </div>
 
                 {/* Actions */}
-                {role === "PROVIDER" && (
+                {(user?.role === "PROVIDER" || user?.role === "ROLE_PROVIDER") && (
                   <div className="flex space-x-2 pt-4 border-t border-gray-100">
                     <button className="flex items-center px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                       <Eye className="w-3 h-3 mr-1" />
@@ -431,7 +422,7 @@ export default function BookingsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  {role === "PROVIDER" && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>}
+                  {(user?.role === "PROVIDER" || user?.role === "ROLE_PROVIDER") && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -448,7 +439,7 @@ export default function BookingsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rs. {booking.totalPrice.toLocaleString()}</td>
-                    {role === "PROVIDER" && (
+                    {(user?.role === "PROVIDER" || user?.role === "ROLE_PROVIDER") && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button className="text-blue-600 hover:text-blue-900">
                           <Eye className="w-4 h-4" />

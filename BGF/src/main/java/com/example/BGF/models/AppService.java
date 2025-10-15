@@ -40,7 +40,7 @@ public class  AppService {
         return name;
     }
 
-    public void setServiceName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -92,9 +92,6 @@ public class  AppService {
         this.user = user;
     }
 
-    public String getServiceName() {
-        return name;
-    }
 }
 
 

@@ -1,7 +1,8 @@
 "use client";
 import { use, useEffect, useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation"; // 👈 Add this
+import { useRouter } from "next/navigation";
+import BookingButton from "../../components/BookingButton";
 
 export default function ServiceDetailsPage({ params }) {
   const { id } = use(params);
@@ -175,14 +176,13 @@ export default function ServiceDetailsPage({ params }) {
               </div>
             )}
 
-            {/* Action Buttons */}
+            {/* Booking Section */}
+            <div className="mt-6">
+              <BookingButton service={service} />
+            </div>
+
+            {/* Additional Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
-              <button
-                onClick={handleBookNow}
-                className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-teal-700 hover:to-cyan-700 transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
-              >
-                📅 Book Now
-              </button>
               <button
                 onClick={handleWriteReview}
                 className="flex-1 bg-gradient-to-r from-gray-700 to-gray-900 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:from-gray-800 hover:to-black transition-all duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50"

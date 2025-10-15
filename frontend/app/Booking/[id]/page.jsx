@@ -111,6 +111,7 @@ export default function EnhancedBookingForm() {
 
   const handleSubmit = async () => {
     if (!customerId || !service?.id || !scheduledDate || !token) {
+      console.log("Booking validation failed:", { customerId, serviceId: service?.id, scheduledDate, token: !!token, user });
       showToast("You must be logged in and fill all fields to book.", "error");
       return;
     }
@@ -127,6 +128,7 @@ export default function EnhancedBookingForm() {
       totalPrice: Number(service.price)
     };
 
+    console.log("Booking payload:", bookingPayload);
     setLoading(true);
 
     try {
@@ -405,7 +407,7 @@ export default function EnhancedBookingForm() {
                           <p className="font-medium text-gray-800">{user.name || user.username}</p>
                           <p className="text-gray-600">{user.email}</p>
                           <p className="text-gray-600">{user.phone || user.contact || "N/A"}</p>
-                          <p className="text-gray-600 font-mono">ID: {user.id}</p>
+                          <p className="text-gray-600 font-mono">ID: {user.id || 'N/A'}</p>
                         </div>
                       )}
                     </div>
