@@ -14,10 +14,17 @@ export function AuthProvider({ children }) {
     if (savedToken && savedToken.split('.').length === 3) {
       try {
         const decoded = jwtDecode(savedToken);
+        console.log("Decoded JWT:", decoded); // Debug log
         // Check if token is expired
         if (decoded.exp * 1000 > Date.now()) {
           setToken(savedToken);
-          setUser({ username: decoded.sub, role: decoded.role });
+          const userData = { 
+            id: decoded.userId, 
+            username: decoded.sub, 
+            role: decoded.role 
+          };
+          console.log("Setting user data:", userData); // Debug log
+          setUser(userData);
         } else {
           localStorage.removeItem('token'); // remove expired token
         }
@@ -35,7 +42,14 @@ export function AuthProvider({ children }) {
   localStorage.setItem('token', jwtToken);
   setToken(jwtToken);
   const decoded = jwtDecode(jwtToken);
-  setUser({ username: decoded.sub, role: decoded.role });
+  console.log("Login - Decoded JWT:", decoded); // Debug log
+  const userData = { 
+    id: decoded.userId, 
+    username: decoded.sub, 
+    role: decoded.role 
+  };
+  console.log("Login - Setting user data:", userData); // Debug log
+  setUser(userData);
 };
 
 

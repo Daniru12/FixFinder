@@ -36,7 +36,7 @@ public class AuthController {
         return userService.findByUsername(user.getUsername())
                 .map(found -> {
                     if (userService.validatePassword(user.getPassword(), found.getPassword())) {
-                        String token = jwtUtil.generateToken(found.getUsername(), found.getRole());
+                        String token = jwtUtil.generateToken(found.getUsername(), found.getRole(), found.getId());
                         Map<String, String> response = new HashMap<>();
                         response.put("token", token);
                         response.put("id", String.valueOf(found.getId()));

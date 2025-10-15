@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from "next/link";
+import BookingButton from "../components/BookingButton";
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
@@ -47,10 +48,16 @@ export default function ServicesPage() {
             <p className="text-gray-600 text-sm mb-2">{service.description}</p>
             <p className="font-medium text-blue-600">Category: {service.category}</p>
             <p className="font-medium text-green-600">Status: {service.status}</p>
-            <p className="text-lg font-bold mt-2">${service.price}</p>
+            <p className="text-lg font-bold mt-2">LKR {service.price?.toLocaleString() || 'Price not set'}</p>
             <p className="text-sm text-gray-500 mt-1">Provider: {service.user?.username}</p>
+            
+            {/* Booking Button */}
+            <div className="mt-4">
+              <BookingButton service={service} className="mb-3" />
+            </div>
+            
             <Link href={`/service/${service.id}`}>
-              <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+              <button className="w-full bg-gray-600 text-white py-2 rounded-lg hover:bg-gray-700 transition">
                 View Details
               </button>
             </Link>

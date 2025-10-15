@@ -15,7 +15,7 @@ public class ServiceService {
     private ServiceRepository serviceRepository;
 
     public AppService addService(AppService service, User user) {
-        if (service.getServiceName() == null || service.getServiceName().isBlank()) {
+        if (service.getName() == null || service.getName().isBlank()) {
             throw new IllegalArgumentException("Service name cannot be null or empty");
         }
         if (user==null){
@@ -41,13 +41,13 @@ public class ServiceService {
 
         // Check permissions: either the user owns the service or is an admin
         if (!existingService.getUser().getId().equals(user.getId()) && 
-            !"ROLE_ADMIN".equals(user.getRole())) {
+            !"ROLE_ADMIN".equals(user.getRole()) && !"ADMIN".equals(user.getRole())) {
             throw new IllegalArgumentException("You don't have permission to update this service");
         }
 
         // Update all fields
-        if (updatedService.getServiceName() != null && !updatedService.getServiceName().isBlank()) {
-            existingService.setServiceName(updatedService.getServiceName());
+        if (updatedService.getName() != null && !updatedService.getName().isBlank()) {
+            existingService.setName(updatedService.getName());
         }
         if (updatedService.getDescription() != null) {
             existingService.setDescription(updatedService.getDescription());
@@ -74,7 +74,7 @@ public class ServiceService {
 
         // Check permissions: either the user owns the service or is an admin
         if (!service.getUser().getId().equals(user.getId()) && 
-            !"ROLE_ADMIN".equals(user.getRole())) {
+            !"ROLE_ADMIN".equals(user.getRole()) && !"ADMIN".equals(user.getRole())) {
             throw new IllegalArgumentException("You don't have permission to delete this service");
         }
 
