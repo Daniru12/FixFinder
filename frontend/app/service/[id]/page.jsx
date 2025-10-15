@@ -3,27 +3,32 @@ import { use, useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import BookingButton from "../../components/BookingButton";
+import Reviews from "../../components/review" // Import the reviews component
 
 export default function ServiceDetailsPage({ params }) {
   const { id } = use(params);
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const router = useRouter(); // 👈 Initialize router
+  const router = useRouter();
+
+  const handleBookNow = () => {
+    router.push(`/Booking/${id}`);
+  };
+
+  const handleWriteReview = () => {
+    router.push(`/review?serviceId=${id}`);
+  };
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
     axios
-      .get(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/services/user/${id}`,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : undefined,
-          },
-        }
-      )
+      .get(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/services/user/${id}`, {
+        headers: { Authorization: token ? `Bearer ${token}` : undefined },
+      })
       .then((res) => {
         setService(res.data);
         setLoading(false);
@@ -33,14 +38,6 @@ export default function ServiceDetailsPage({ params }) {
         setLoading(false);
       });
   }, [id]);
-
-  const handleBookNow = () => {
-    router.push(`/Booking/${id}`);
-  };
-
-  const handleWriteReview = () => {
-    router.push(`/review/${id}`);
-  };
 
   if (loading) {
     return (
@@ -108,11 +105,11 @@ export default function ServiceDetailsPage({ params }) {
               <div className="absolute bottom-6 left-6 z-20">
                 <h2 className="text-4xl font-bold text-white mb-2">{service.name}</h2>
                 <div className="flex items-center space-x-2">
-                  <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
-                    service.status === 'active' 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-gray-500 text-white'
-                  }`}>
+                  <span
+                    className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
+                      service.status === "active" ? "bg-green-500 text-white" : "bg-gray-500 text-white"
+                    }`}
+                  >
                     {service.status}
                   </span>
                   <span className="px-4 py-1.5 bg-teal-500/90 backdrop-blur-sm text-white rounded-full text-sm font-semibold">
@@ -153,9 +150,7 @@ export default function ServiceDetailsPage({ params }) {
             {/* Description */}
             <div className="bg-gray-50 rounded-xl p-6 mb-6 border border-gray-200">
               <h3 className="text-teal-600 font-bold text-lg mb-3 flex items-center">
-                <span className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center mr-3 text-white">
-                  📝
-                </span>
+                <span className="w-8 h-8 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center mr-3 text-white">📝</span>
                 Description
               </h3>
               <p className="text-gray-700 leading-relaxed">{service.description}</p>
@@ -165,14 +160,10 @@ export default function ServiceDetailsPage({ params }) {
             {service.user && (
               <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl p-6 text-white mb-6">
                 <h3 className="font-bold text-lg mb-3 flex items-center">
-                  <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3 backdrop-blur-sm">
-                    👤
-                  </span>
+                  <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3 backdrop-blur-sm">👤</span>
                   Provider
                 </h3>
-                <p className="text-xl font-semibold">
-                  {service.user.username || service.user.email || service.user.name}
-                </p>
+                <p className="text-xl font-semibold">{service.user.username || service.user.email || service.user.name}</p>
               </div>
             )}
 
@@ -181,7 +172,10 @@ export default function ServiceDetailsPage({ params }) {
               <BookingButton service={service} />
             </div>
 
-            {/* Additional Action Buttons */}
+            {/* ✅ Reviews Component */}
+            <Reviews serviceId={id} />
+
+            {/* Write Review Button */}
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <button
                 onClick={handleWriteReview}
