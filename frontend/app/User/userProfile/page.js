@@ -2,6 +2,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { Calendar } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user, token } = useContext(AuthContext);
@@ -131,12 +132,21 @@ export default function ProfilePage() {
               </div>
             </div>
             {!isEditing && (
-              <button
-                onClick={handleEdit}
-                className="px-6 py-2.5 bg-white text-cyan-600 rounded-lg hover:bg-cyan-50 transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
-              >
-                Edit Profile
-              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => router.push('/Booking/Bookings')}
+                  className="px-6 py-2.5 bg-white text-cyan-600 rounded-lg hover:bg-cyan-50 transition-all duration-200 font-semibold shadow-md hover:shadow-lg flex items-center space-x-2"
+                >
+                  <Calendar className="w-5 h-5" />
+                  <span>View My Bookings</span>
+                </button>
+                <button
+                  onClick={handleEdit}
+                  className="px-6 py-2.5 bg-white text-cyan-600 rounded-lg hover:bg-cyan-50 transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
+                >
+                  Edit Profile
+                </button>
+              </div>
             )}
           </div>
         </div>

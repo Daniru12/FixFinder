@@ -68,12 +68,6 @@ public class BookingController {
 
 
 
-    @DeleteMapping("/api/bookings/{bookingId}")
-    public ResponseEntity<String> removeBooking(@PathVariable Long bookingId, Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        bookingService.removeBooking(bookingId, user);
-        return ResponseEntity.ok("Booking removed successfully");
-    }
 
     // Get booking by ID
     @GetMapping("/{id}")

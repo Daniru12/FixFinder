@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Link from "next/link";
+import Link from 'next/link';
+import BookingButton from '../components/BookingButton';
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
@@ -19,43 +20,83 @@ export default function ServicesPage() {
   }, []);
 
   if (loading) {
-    return <p className="text-center py-10">Loading services...</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-gray-600">Loading services...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="text-center py-10 text-red-500">{error}</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500 text-lg">Error: {error}</p>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-6">
-      <h1 className="text-3xl font-bold text-center mb-8">Available Services</h1>
+    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 text-center mb-10">
+          Available Services
+        </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((service) => (
-          <div
-            key={service.id}
-            className="bg-white shadow-md rounded-2xl p-4 hover:shadow-lg transition"
-          >
-            {service.images && (
-              <img
-                src={service.images}
-                alt={service.name}
-                className="w-full h-40 object-cover rounded-lg mb-3"
-              />
-            )}
-            <h2 className="text-xl font-semibold">{service.name}</h2>
-            <p className="text-gray-600 text-sm mb-2">{service.description}</p>
-            <p className="font-medium text-blue-600">Category: {service.category}</p>
-            <p className="font-medium text-green-600">Status: {service.status}</p>
-            <p className="text-lg font-bold mt-2">${service.price}</p>
-            <p className="text-sm text-gray-500 mt-1">Provider: {service.user?.username}</p>
-            <Link href={`/service/${service.id}`}>
-              <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-                View Details
-              </button>
-            </Link>
+        {services.length === 0 ? (
+          <p className="text-center text-gray-500">No services available at the moment.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {services.map((service) => (
+              <div
+                key={service.id}
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              >
+                {/* Service Image */}
+                {service.images && service.images.length > 0 ? (
+                  <div className="h-48 w-full overflow-hidden">
+                    <img
+                      src={service.images[0]} // Assuming images is an array of URLs
+                      alt={service.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="h-48 w-full bg-gray-200 flex items-center justify-center">
+                    <span className="text-gray-500">No image available</span>
+                  </div>
+                )}
+
+                {/* Service Info */}
+                <div className="p-5">
+                  <h2 className="text-xl font-semibold text-gray-800">{service.name}</h2>
+                  <p className="mt-2 text-gray-600 line-clamp-2">{service.description}</p>
+
+                  <div className="mt-3 space-y-1 text-sm text-gray-500">
+                    <p><span className="font-medium">Category:</span> {service.category}</p>
+                    <p><span className="font-medium">Status:</span> {service.status}</p>
+                    <p><span className="font-medium">Provider:</span> {service.user?.username || 'N/A'}</p>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-lg font-bold text-green-600">
+                      LKR {service.price?.toLocaleString() || 'Price not set'}
+                    </span>
+                    <BookingButton serviceId={service.id} />
+                  </div>
+
+                  <div className="mt-4 text-center">
+                    <Link
+                      href={`/service/${service.id}`}
+                      className="inline-block px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

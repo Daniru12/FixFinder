@@ -9,10 +9,11 @@ public class JwtUtil {
     private final String SECRET = "MySuperLongJwtSecretKey1234567890ABCDEF"; // should match properties
     private final long EXPIRATION = 3600000; // 1 hour
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, String role, Long userId) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
+                .claim("userId", userId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(SECRET.getBytes()))
@@ -35,5 +36,14 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .get("role");
+    }
+
+    public Long extractUserId(String token) {
+        return ((Number) Jwts.parserBuilder()
+                .setSigningKey(SECRET.getBytes())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("userId")).longValue();
     }
 }
