@@ -1,8 +1,12 @@
-'use client';
+"use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function ReviewForm() {
+  const searchParams = useSearchParams();
+  const serviceId = searchParams.get("serviceId"); // ✅ Get from URL
+
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [message, setMessage] = useState("");
@@ -11,17 +15,16 @@ export default function ReviewForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!rating || !comment) {
+    if (!rating || !comment || !serviceId) {
       setMessage("❌ Please fill in all fields.");
       return;
     }
 
-    // Nested object payload
     const reviewData = {
       rating: Number(rating),
       comment,
-      user: { id: 1 },      // Hardcoded user ID
-      service: { id: 2 }    // Hardcoded service ID
+      user: { id: 1 }, // keep your user id logic
+      service: { id: Number(serviceId) }, // ✅ dynamic from URL
     };
 
     setLoading(true);
