@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .requestMatchers("/services/user/all").permitAll()
                         .requestMatchers("/services/user/{id}").permitAll()
                         .requestMatchers("/services/user/**").hasAnyRole("USER", "ADMIN", "PROVIDER")
+                        .requestMatchers("/users/profile/**").permitAll()
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN", "PROVIDER")
                         .requestMatchers("/users/admin/**").hasRole("ADMIN")
                         .requestMatchers("/reviews/**").permitAll()
