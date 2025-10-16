@@ -194,6 +194,16 @@ export default function ProfilePage() {
             )}
               
               {!isEditing && (
+              <button
+                onClick={() => router.push('/User/my-orders')}
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 hover:from-green-700 hover:to-emerald-700"
+              >
+                <Briefcase className="w-4 h-4 mr-2" />
+                My Orders
+              </button>
+            )}
+              
+              {!isEditing && (
                 <button
                   onClick={handleEdit}
                   className="flex items-center space-x-2 px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold hover:bg-white/30 transition-all duration-200 border border-white/30 hover:border-white/40 hover:scale-105"

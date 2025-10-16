@@ -136,4 +136,16 @@ public class Product {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", stockQuantity=" + stockQuantity +
+                ", status='" + status + '\'' +
+                ", provider=" + (provider != null ? provider.getUsername() : "null") +
+                '}';
+    }
 }

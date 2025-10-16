@@ -222,3 +222,83 @@ export const productAPI = {
       headers: { Authorization: `Bearer ${token}` },
     }),
 };
+
+// Order API functions
+export const orderAPI = {
+  // Create a new order
+  create: (orderData, token) => {
+    return API.post('/orders/create', orderData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get all orders (Admin only)
+  getAll: (token) => {
+    return API.get('/orders', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get order by ID
+  getById: (orderId, token) => {
+    return API.get(`/orders/${orderId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get my orders (customer's own orders)
+  getMyOrders: (token) => {
+    return API.get('/orders/my-orders', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get provider orders
+  getProviderOrders: (token) => {
+    return API.get('/orders/provider-orders', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get orders by status
+  getByStatus: (status, token) => {
+    return API.get(`/orders/status/${status}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Get my orders by status
+  getMyOrdersByStatus: (status, token) => {
+    return API.get(`/orders/my-orders/status/${status}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update order
+  update: (orderId, orderData, token) => {
+    return API.put(`/orders/${orderId}`, orderData, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Update order status
+  updateStatus: (orderId, status, token) => {
+    return API.put(`/orders/${orderId}/status?status=${status}`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Delete order
+  delete: (orderId, token) => {
+    return API.delete(`/orders/${orderId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  },
+
+  // Cancel order
+  cancel: (orderId, token) => {
+    return API.put(`/orders/${orderId}/cancel`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+};

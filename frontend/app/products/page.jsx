@@ -3,10 +3,8 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   SearchIcon,
-  ShoppingCartIcon,
   SlidersIcon,
   StarIcon,
-  EyeIcon,
 } from 'lucide-react';
 import ProductDetails from '../components/ProductDetails';
 import { productAPI } from '../utils/api';
@@ -243,7 +241,8 @@ export default function ProductsPage() {
               filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px] border border-white/50 group"
+                  onClick={() => setSelectedProduct(product)}
+                  className="bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px] border border-white/50 group cursor-pointer"
                 >
                   <div className="h-48 overflow-hidden relative">
                     <img
@@ -275,22 +274,27 @@ export default function ProductsPage() {
                     <p className="text-blue-600 font-bold text-xl mb-4">
                       Rs. {product.price.toLocaleString()}
                     </p>
-                    {/* Action buttons */}
-                    <div className="flex items-center justify-end gap-3">
-                      <button
-                        className="p-2 rounded-lg flex items-center justify-center text-white transition-all duration-300 bg-blue-600 hover:bg-blue-700"
-                        aria-label="Add to cart"
-                      >
-                        <ShoppingCartIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setSelectedProduct(product)}
-                        className="p-2 rounded-lg flex items-center justify-center text-white transition-all duration-300 bg-purple-600 hover:bg-purple-700"
-                        aria-label="View details"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {/* Buy Now Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Navigate to shipping address page with product info including default quantity
+                        const params = new URLSearchParams({
+                          productId: product.id,
+                          productName: product.title,
+                          productPrice: product.price.toString(),
+                          quantity: '1', // Default quantity
+                          stockQuantity: (product.stockQuantity || 10).toString(),
+                        });
+                        router.push(`/checkout/shipping?${params.toString()}`);
+                      }}
+                      className="w-full py-2.5 px-4 rounded-lg text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                      style={{
+                        background: 'linear-gradient(to right, #10b981, #059669, #047857)',
+                      }}
+                    >
+                      Buy Now
+                    </button>
                   </div>
                 </div>
               ))

@@ -59,4 +59,16 @@ public class User {
 
     public void setAvailable(boolean available) { this.available = available; }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", role='" + role + '\'' +
+                ", email='" + email + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", serviceType='" + serviceType + '\'' +
+                ", available=" + available +
+                '}';
+    }
 }

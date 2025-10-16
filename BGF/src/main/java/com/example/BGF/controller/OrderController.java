@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/orders")
@@ -20,11 +21,34 @@ public class OrderController {
 
     // CREATE - Create a new order (only authenticated users)
     @PostMapping("/create")
-    public ResponseEntity<Order> createOrder(@RequestBody Order order, @AuthenticationPrincipal User user) {
+    public ResponseEntity<?> createOrder(@RequestBody Order order, @AuthenticationPrincipal User user) {
         try {
-            return ResponseEntity.ok(orderService.createOrder(order, user));
+            System.out.println("=== ORDER CONTROLLER DEBUG ===");
+            System.out.println("Received order: " + order);
+            System.out.println("User: " + user);
+            System.out.println("Product ID: " + (order.getProduct() != null ? order.getProduct().getId() : "null"));
+            System.out.println("Quantity: " + order.getQuantity());
+            System.out.println("Delivery Fee: " + order.getDeliveryFee());
+            System.out.println("Payment Method: " + order.getPaymentMethod());
+            System.out.println("Delivery Address: " + order.getDeliveryAddress());
+            System.out.println("Notes: " + order.getNotes());
+            System.out.println("Status: " + order.getStatus());
+            System.out.println("===============================");
+            
+            Order createdOrder = orderService.createOrder(order, user);
+            return ResponseEntity.ok(createdOrder);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            System.out.println("RuntimeException: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("Exception: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("error", "Internal server error: " + e.getMessage()));
+        } catch (Throwable t) {
+            System.out.println("Throwable: " + t.getMessage());
+            t.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", "Unexpected error: " + t.getMessage()));
         }
     }
 
@@ -153,20 +177,21 @@ public class OrderController {
         }
     }
 
-    // CANCEL - Cancel order (customer only)
+    // CANCEL - Cancel order (customer only) - deletes from database
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<Order> cancelOrder(@PathVariable Long id, @AuthenticationPrincipal User user) {
+    public ResponseEntity<Map<String, String>> cancelOrder(@PathVariable Long id, @AuthenticationPrincipal User user) {
         try {
             Order existingOrder = orderService.getOrderById(id);
             
             // Check if user is the customer or admin
             if (!"ADMIN".equals(user.getRole()) && !existingOrder.getCustomer().getId().equals(user.getId())) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body(Map.of("error", "Unauthorized to cancel this order"));
             }
             
-            return ResponseEntity.ok(orderService.cancelOrder(id));
+            orderService.cancelOrder(id);
+            return ResponseEntity.ok(Map.of("message", "Order cancelled and deleted successfully"));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }

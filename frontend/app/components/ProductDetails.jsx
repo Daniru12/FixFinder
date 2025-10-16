@@ -1,8 +1,15 @@
 'use client';
-import React from 'react';
-import { ArrowLeftIcon, ShoppingCartIcon, StarIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeftIcon, CreditCardIcon, StarIcon, PackageIcon } from 'lucide-react';
 
 export default function ProductDetails({ product, onBack }) {
+  const router = useRouter();
+  const [quantity, setQuantity] = useState(1);
+  
+  // Get stock quantity from product (default to 10 if not available)
+  const stockQuantity = product.stockQuantity || 10;
+  const isInStock = stockQuantity > 0;
   if (!product) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50 flex items-center justify-center">
@@ -91,7 +98,7 @@ export default function ProductDetails({ product, onBack }) {
               </div>
 
               {/* Description */}
-              <div className="mb-8">
+              <div className="mb-6">
                 <h3 className="text-gray-800 font-medium mb-2">Description</h3>
                 <p className="text-gray-600">
                   This premium {product.title.toLowerCase()} is designed for
@@ -101,17 +108,89 @@ export default function ProductDetails({ product, onBack }) {
                 </p>
               </div>
 
-              {/* Add to Cart Button */}
+              {/* Stock Information */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <PackageIcon className="h-5 w-5 text-blue-600" />
+                  <span className="text-gray-800 font-medium">Availability</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    {isInStock ? `${stockQuantity} items in stock` : 'Out of stock'}
+                  </span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    isInStock 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {isInStock ? 'In Stock' : 'Out of Stock'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quantity Selector */}
+              {isInStock && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-gray-800 font-medium">Quantity</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center border border-gray-300 rounded-lg">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-l-lg transition-colors"
+                        disabled={quantity <= 1}
+                      >
+                        -
+                      </button>
+                      <span className="w-16 h-10 flex items-center justify-center font-medium text-gray-800 border-x border-gray-300">
+                        {quantity}
+                      </span>
+                      <button
+                        onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
+                        className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded-r-lg transition-colors"
+                        disabled={quantity >= stockQuantity}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      Max: {stockQuantity}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Buy Now Button */}
               <button
-                className="w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-white transition-all duration-300 shadow-md hover:shadow-lg"
+                onClick={() => {
+                  if (!isInStock) return;
+                  
+                  // Navigate to shipping address page with product info including quantity
+                  const params = new URLSearchParams({
+                    productId: product.id,
+                    productName: product.title,
+                    productPrice: product.price.toString(),
+                    quantity: quantity.toString(),
+                    stockQuantity: stockQuantity.toString(),
+                  });
+                  router.push(`/checkout/shipping?${params.toString()}`);
+                }}
+                disabled={!isInStock}
+                className={`w-full py-3 px-4 rounded-lg flex items-center justify-center gap-2 text-white transition-all duration-300 shadow-md ${
+                  isInStock 
+                    ? 'hover:shadow-lg cursor-pointer' 
+                    : 'opacity-50 cursor-not-allowed'
+                }`}
                 style={{
-                  background:
-                    'linear-gradient(to right, rgba(37, 99, 235, 0.9), rgba(147, 51, 234, 0.9), rgba(79, 70, 229, 0.9))',
+                  background: isInStock
+                    ? 'linear-gradient(to right, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9))'
+                    : 'linear-gradient(to right, rgba(156, 163, 175, 0.9), rgba(107, 114, 128, 0.9))',
                   backdropFilter: 'blur(8px)',
                 }}
               >
-                <ShoppingCartIcon className="h-5 w-5" />
-                Add to Cart
+                <CreditCardIcon className="h-5 w-5" />
+                {isInStock ? `Buy Now (${quantity} item${quantity > 1 ? 's' : ''})` : 'Out of Stock'}
               </button>
             </div>
           </div>

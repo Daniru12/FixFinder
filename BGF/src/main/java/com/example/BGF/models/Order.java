@@ -25,6 +25,11 @@ public class Order {
     @Column(nullable = false)
     private Double totalPrice; // quantity * product.price
 
+    @Column(nullable = false)
+    private Double deliveryFee = 300.0; // Default delivery fee for island-wide delivery
+
+    private String paymentMethod = "COD"; // COD, CREDIT_CARD, etc.
+
     private String status = "PENDING"; // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
 
     private String deliveryAddress;
@@ -91,6 +96,22 @@ public class Order {
         this.totalPrice = totalPrice;
     }
 
+    public Double getDeliveryFee() {
+        return deliveryFee;
+    }
+
+    public void setDeliveryFee(Double deliveryFee) {
+        this.deliveryFee = deliveryFee;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -140,7 +161,25 @@ public class Order {
     // Helper method to calculate total price
     public void calculateTotalPrice() {
         if (product != null && quantity != null) {
-            this.totalPrice = product.getPrice() * quantity;
+            this.totalPrice = (product.getPrice() * quantity) + deliveryFee;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", customer=" + (customer != null ? customer.getUsername() : "null") +
+                ", product=" + (product != null ? product.getId() + ":" + product.getName() : "null") +
+                ", quantity=" + quantity +
+                ", totalPrice=" + totalPrice +
+                ", deliveryFee=" + deliveryFee +
+                ", paymentMethod='" + paymentMethod + '\'' +
+                ", status='" + status + '\'' +
+                ", deliveryAddress='" + deliveryAddress + '\'' +
+                ", notes='" + notes + '\'' +
+                ", orderDate=" + orderDate +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }
