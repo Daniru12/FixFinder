@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useContext } from 'react';
 import Link from 'next/link';
-import { MenuIcon, XIcon, UserIcon } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext'; // adjust path if needed
+import { MenuIcon, XIcon } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,166 +11,155 @@ const Header = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-white/20 backdrop-blur-lg border-b border-white/30 sticky top-0 z-50 supports-backdrop-blur:bg-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Desktop Header */}
-        <div className="flex justify-between h-16">
-          {/* Logo & Desktop Nav */}
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center">
-              <span className="text-2xl font-bold text-teal-600">
-                Fix<span className="text-blue-600">Finder</span>
-              </span>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center">
+            <span className="text-xl font-semibold text-teal-600 drop-shadow-sm">
+              Fix<span className="text-blue-600">Finder</span>
+            </span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link
+              href="/service"
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 backdrop-blur-sm rounded-lg hover:bg-white/30"
+            >
+              Services
             </Link>
-            <nav className="hidden md:ml-10 md:flex md:space-x-8">
+            <Link
+              href="/products"
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 backdrop-blur-sm rounded-lg hover:bg-white/30"
+            >
+              Products
+            </Link>
+            <Link
+              href="/about"
+              className="text-gray-700 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors duration-200 backdrop-blur-sm rounded-lg hover:bg-white/30"
+            >
+              About
+            </Link>
+          </nav>
+
+          {/* Desktop Auth Section */}
+          <div className="hidden md:flex items-center space-x-3">
+            {user ? (
+              <>
+                <Link 
+                  href={user.role === 'ROLE_PROVIDER' ? './Provider/providerProfile' : './User/userProfile'}
+                  className="text-sm text-gray-700 hover:text-gray-900 px-3 py-2 transition-colors duration-200 backdrop-blur-sm rounded-lg hover:bg-white/30"
+                >
+                  {user.username}
+                </Link>
+                <button
+                  onClick={logout}
+                  className="text-sm text-gray-700 hover:text-gray-900 px-3 py-2 transition-colors duration-200 backdrop-blur-sm rounded-lg hover:bg-white/30"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm text-gray-700 hover:text-gray-900 px-3 py-2 transition-colors duration-200 backdrop-blur-sm rounded-lg hover:bg-white/30"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-teal-600/90 backdrop-blur-sm text-white hover:bg-teal-700/90 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border border-teal-500/30 shadow-sm"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden p-2 rounded-lg text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {isMenuOpen ? (
+              <XIcon className="h-5 w-5" />
+            ) : (
+              <MenuIcon className="h-5 w-5" />
+            )}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="md:hidden border-t border-white/30 bg-white/20 backdrop-blur-xl">
+            <div className="py-2 space-y-1">
               <Link
                 href="/service"
-                className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                onClick={toggleMenu}
               >
-                Find Services
+                Services
               </Link>
               <Link
                 href="/products"
-                className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                onClick={toggleMenu}
               >
                 Products
               </Link>
               <Link
-                href="/contact"
-                className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                href="/about"
+                className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                onClick={toggleMenu}
               >
-                About Us
+                About
               </Link>
-              <Link
-                href="./Admin/admin-dashboard"
-                className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Become a Provider
-              </Link>
-            </nav>
-          </div>
+            </div>
 
-{/* Desktop Auth Section */}
-<div className="hidden md:flex items-center space-x-4">
-  {user ? (
-    <>
-      <Link href={user.role === 'ROLE_PROVIDER' ? './Provider/providerProfile' : './User/userProfile'}>
-        <span className="text-gray-700 text-sm font-medium cursor-pointer hover:underline">
-          Hi, {user.username}
-        </span>
-      </Link>
-      <button
-        onClick={logout}
-        className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-100 transition-colors"
-      >
-        Logout
-      </button>
-    </>
-  ) : (
-    <>
-      <Link
-        href="/login"
-        className="text-gray-700 hover:text-teal-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-      >
-        Login
-      </Link>
-      <Link
-        href="/register"
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 transition-colors"
-      >
-        Sign Up
-      </Link>
-    </>
-  )}
-</div>
-
-
-          {/* Mobile Menu Button */}
-          <div className="flex items-center md:hidden">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-teal-600 hover:bg-gray-100 focus:outline-none"
-              aria-expanded={isMenuOpen}
-              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-            >
-              {isMenuOpen ? (
-                <XIcon className="h-6 w-6" aria-hidden="true" />
+            <div className="border-t border-white/30 py-2">
+              {user ? (
+                <div className="space-y-1">
+                  <Link
+                    href={user.role === 'ROLE_PROVIDER' ? './Provider/providerProfile' : './User/userProfile'}
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                    onClick={toggleMenu}
+                  >
+                    Profile: {user.username}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      logout();
+                      toggleMenu();
+                    }}
+                    className="block w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                  >
+                    Logout
+                  </button>
+                </div>
               ) : (
-                <MenuIcon className="h-6 w-6" aria-hidden="true" />
+                <div className="space-y-1">
+                  <Link
+                    href="/login"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                    onClick={toggleMenu}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="block px-4 py-3 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-white/30 transition-all duration-200 backdrop-blur-sm mx-2 rounded-lg"
+                    onClick={toggleMenu}
+                  >
+                    Sign Up
+                  </Link>
+                </div>
               )}
-            </button>
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden bg-white border-t border-gray-200`}>
-        <div className="px-4 py-3 space-y-1 sm:px-6">
-          <Link
-            href="/service"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-            onClick={toggleMenu}
-          >
-            Find Services
-          </Link>
-          <Link
-            href="/products"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-            onClick={toggleMenu}
-          >
-            Products
-          </Link>
-          <Link
-            href="/about"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-            onClick={toggleMenu}
-          >
-            About Us
-          </Link>
-          <Link
-            href="./Admin/admin-dashboard"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-            onClick={toggleMenu}
-          >
-            Become a Provider
-          </Link>
-        </div>
-
-        <div className="px-4 py-3 border-t border-gray-200 sm:px-6">
-          {user ? (
-            <div>
-              <p className="text-base font-medium text-gray-800 mb-2">
-                Hi, {user.username}
-              </p>
-              <button
-                onClick={() => {
-                  logout();
-                  toggleMenu();
-                }}
-                className="w-full block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-1">
-              <Link
-                href="/login"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-                onClick={toggleMenu}
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-teal-600 hover:bg-gray-100 transition-colors"
-                onClick={toggleMenu}
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
-        </div>
+        )}
       </div>
     </header>
   );
