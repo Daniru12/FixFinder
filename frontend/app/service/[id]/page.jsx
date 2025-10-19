@@ -274,10 +274,10 @@ export default function ServiceDetailsPage({ params }) {
               </div>
 
               {/* Service ID */}
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              {/* <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                 <p className="text-gray-600 text-sm font-semibold mb-1 uppercase tracking-wide">Service ID</p>
                 <p className="text-gray-800 font-mono text-sm">{service.id}</p>
-              </div>
+              </div> */}
             </div>
 
             {/* Description Card */}

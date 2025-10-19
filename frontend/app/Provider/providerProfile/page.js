@@ -2,7 +2,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { userAPI } from '../../utils/api';
+import { userAPI, serviceAPI, bookingAPI } from '../../utils/api';
+import { Package, Calendar, Clock, CheckCircle, TrendingUp, User } from 'lucide-react';
 
 export default function ProviderDashboard() {
   const { user, token } = useContext(AuthContext);
@@ -17,6 +18,15 @@ export default function ProviderDashboard() {
     serviceType: ''
   });
   const [isUpdating, setIsUpdating] = useState(false);
+  const [stats, setStats] = useState({
+    totalServices: 0,
+    activeServices: 0,
+    totalBookings: 0,
+    pendingBookings: 0,
+    confirmedBookings: 0,
+    completedBookings: 0
+  });
+  const [loadingStats, setLoadingStats] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,8 +35,35 @@ export default function ProviderDashboard() {
     }
     if (user?.username && token) {
       loadProfile();
+      fetchStats();
     }
   }, [user, token, router]);
+
+  const fetchStats = async () => {
+    try {
+      setLoadingStats(true);
+      const [servicesRes, bookingsRes] = await Promise.all([
+        serviceAPI.getMyServices(token).catch(() => ({ data: [] })),
+        bookingAPI.getProviderBookings(token).catch(() => ({ data: [] }))
+      ]);
+
+      const services = servicesRes.data || [];
+      const bookings = bookingsRes.data || [];
+
+      setStats({
+        totalServices: services.length,
+        activeServices: services.filter(s => s.status === 'ACTIVE').length,
+        totalBookings: bookings.length,
+        pendingBookings: bookings.filter(b => b.status === 'PENDING').length,
+        confirmedBookings: bookings.filter(b => b.status === 'CONFIRMED').length,
+        completedBookings: bookings.filter(b => b.status === 'COMPLETED').length
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
 
   const loadProfile = async () => {
     try {
@@ -301,27 +338,144 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="p-6 bg-white shadow rounded-xl">
-          <h2 className="text-sm font-medium text-gray-500">Current Status</h2>
-          <div className="flex items-center mt-2">
-            <div className={`w-3 h-3 rounded-full mr-2 ${profile.available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <p className={`text-lg font-bold ${profile.available ? 'text-green-600' : 'text-red-600'}`}>
+      <div className="mb-8">
+        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+          <TrendingUp className="h-6 w-6 mr-2 text-teal-600" />
+          Dashboard Overview
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Current Status */}
+          <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <User className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className={`w-3 h-3 rounded-full ${profile.available ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+            </div>
+            <h3 className="text-gray-600 text-sm font-medium mb-1">Current Status</h3>
+            <p className={`text-2xl font-bold ${profile.available ? 'text-green-600' : 'text-red-600'}`}>
               {profile.available ? 'Online' : 'Offline'}
             </p>
           </div>
+
+          {/* Total Services */}
+          <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-purple-50 p-3 rounded-lg">
+                <Package className="h-6 w-6 text-purple-600" />
+              </div>
+              {loadingStats ? (
+                <div className="animate-pulse h-8 w-16 bg-gray-200 rounded"></div>
+              ) : (
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-800">{stats.totalServices}</p>
+                </div>
+              )}
+            </div>
+            <h3 className="text-gray-600 text-sm font-medium mb-1">Total Services</h3>
+            <p className="text-xs text-gray-500">{stats.activeServices} active</p>
+          </div>
+
+          {/* Total Bookings */}
+          <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-green-50 p-3 rounded-lg">
+                <Calendar className="h-6 w-6 text-green-600" />
+              </div>
+              {loadingStats ? (
+                <div className="animate-pulse h-8 w-16 bg-gray-200 rounded"></div>
+              ) : (
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-800">{stats.totalBookings}</p>
+                </div>
+              )}
+            </div>
+            <h3 className="text-gray-600 text-sm font-medium mb-1">Total Bookings</h3>
+            <p className="text-xs text-gray-500">{stats.confirmedBookings} confirmed</p>
+          </div>
+
+          {/* Pending Requests */}
+          <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-orange-50 p-3 rounded-lg">
+                <Clock className="h-6 w-6 text-orange-600" />
+              </div>
+              {loadingStats ? (
+                <div className="animate-pulse h-8 w-16 bg-gray-200 rounded"></div>
+              ) : (
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-800">{stats.pendingBookings}</p>
+                </div>
+              )}
+            </div>
+            <h3 className="text-gray-600 text-sm font-medium mb-1">Pending Requests</h3>
+            <p className="text-xs text-gray-500">Awaiting response</p>
+          </div>
         </div>
-        <div className="p-6 bg-white shadow rounded-xl">
-          <h2 className="text-sm font-medium text-gray-500">Total Services</h2>
-          <p className="text-2xl font-bold text-gray-800">12</p>
-        </div>
-        <div className="p-6 bg-white shadow rounded-xl">
-          <h2 className="text-sm font-medium text-gray-500">Active Bookings</h2>
-          <p className="text-2xl font-bold text-gray-800">5</p>
-        </div>
-        <div className="p-6 bg-white shadow rounded-xl">
-          <h2 className="text-sm font-medium text-gray-500">Pending Requests</h2>
-          <p className="text-2xl font-bold text-gray-800">3</p>
+
+        {/* Additional Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          {/* Completed Bookings */}
+          <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center mb-2">
+                  <CheckCircle className="h-5 w-5 text-teal-600 mr-2" />
+                  <h3 className="text-gray-700 text-sm font-medium">Completed</h3>
+                </div>
+                {loadingStats ? (
+                  <div className="animate-pulse h-8 w-20 bg-teal-200 rounded"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-teal-700">{stats.completedBookings}</p>
+                )}
+              </div>
+              <div className="text-teal-600">
+                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Success Rate */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-gray-700 text-sm font-medium mb-2">Success Rate</h3>
+                {loadingStats ? (
+                  <div className="animate-pulse h-8 w-20 bg-blue-200 rounded"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-blue-700">
+                    {stats.totalBookings > 0 
+                      ? Math.round((stats.completedBookings / stats.totalBookings) * 100)
+                      : 0}%
+                  </p>
+                )}
+              </div>
+              <div className="text-blue-600">
+                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Active Services */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-gray-700 text-sm font-medium mb-2">Active Services</h3>
+                {loadingStats ? (
+                  <div className="animate-pulse h-8 w-20 bg-purple-200 rounded"></div>
+                ) : (
+                  <p className="text-3xl font-bold text-purple-700">{stats.activeServices}</p>
+                )}
+              </div>
+              <div className="text-purple-600">
+                <Package className="w-12 h-12" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
