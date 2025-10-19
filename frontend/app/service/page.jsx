@@ -1,21 +1,29 @@
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Star, MapPin, Clock, Shield, Filter, Search, Sparkles } from 'lucide-react';
-import BookingButton from '../components/BookingButton';
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import {
+  Star,
+  MapPin,
+  Clock,
+  Shield,
+  Filter,
+  Search,
+  Sparkles,
+} from "lucide-react";
+import BookingButton from "../components/BookingButton";
 
 export default function ServicesPage() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [sortBy, setSortBy] = useState('featured');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("featured");
 
   useEffect(() => {
-    fetch('http://localhost:8080/services/user/all')
+    fetch("http://localhost:8080/services/user/all")
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch services');
+        if (!res.ok) throw new Error("Failed to fetch services");
         return res.json();
       })
       .then((data) => setServices(data))
@@ -23,26 +31,37 @@ export default function ServicesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Extract unique categories
-  const categories = ['all', ...new Set(services.map(service => service.category))];
+  // Exclude suspended services (case-insensitive)
+  const visibleServices = services.filter((s) => {
+    const status = (s.status || "").toString().toLowerCase();
+    return status !== "suspended";
+  });
+
+  // Extract unique categories from visible services
+  const categories = [
+    "all",
+    ...new Set(visibleServices.map((service) => service.category)),
+  ];
 
   // Filter and sort services
-  const filteredServices = services
-    .filter(service => 
-      service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredServices = visibleServices
+    .filter(
+      (service) =>
+        service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.category.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .filter(service => 
-      selectedCategory === 'all' || service.category === selectedCategory
+    .filter(
+      (service) =>
+        selectedCategory === "all" || service.category === selectedCategory
     )
     .sort((a, b) => {
       switch (sortBy) {
-        case 'price-low':
+        case "price-low":
           return (a.price || 0) - (b.price || 0);
-        case 'price-high':
+        case "price-high":
           return (b.price || 0) - (a.price || 0);
-        case 'rating':
+        case "rating":
           return (b.rating || 0) - (a.rating || 0);
         default:
           return 0;
@@ -54,7 +73,9 @@ export default function ServicesPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600 font-medium">Discovering amazing services...</p>
+          <p className="text-xl text-gray-600 font-medium">
+            Discovering amazing services...
+          </p>
         </div>
       </div>
     );
@@ -67,9 +88,11 @@ export default function ServicesPage() {
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Shield className="h-8 w-8 text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Unable to Load Services</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Unable to Load Services
+          </h2>
           <p className="text-red-500 text-lg mb-4">Error: {error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
           >
@@ -92,7 +115,8 @@ export default function ServicesPage() {
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Discover trusted professionals for all your needs. Quality guaranteed, satisfaction assured.
+            Discover trusted professionals for all your needs. Quality
+            guaranteed, satisfaction assured.
           </p>
         </div>
 
@@ -121,7 +145,7 @@ export default function ServicesPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
               >
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </option>
@@ -146,9 +170,16 @@ export default function ServicesPage() {
         {/* Results Info */}
         <div className="flex items-center justify-between mb-6">
           <p className="text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{filteredServices.length}</span> services
+            Showing{" "}
+            <span className="font-semibold text-gray-900">
+              {filteredServices.length}
+            </span>{" "}
+            services
             {searchTerm && (
-              <span> for "<span className="font-semibold">{searchTerm}</span>"</span>
+              <span>
+                {" "}
+                for "<span className="font-semibold">{searchTerm}</span>"
+              </span>
             )}
           </p>
         </div>
@@ -159,10 +190,17 @@ export default function ServicesPage() {
             <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Search className="h-10 w-10 text-gray-400" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No services found</h3>
-            <p className="text-gray-600 mb-6">Try adjusting your search or filter criteria</p>
-            <button 
-              onClick={() => { setSearchTerm(''); setSelectedCategory('all'); }}
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              No services found
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Try adjusting your search or filter criteria
+            </p>
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("all");
+              }}
               className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium"
             >
               Clear Filters
@@ -185,17 +223,21 @@ export default function ServicesPage() {
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                      <span className="text-gray-500 font-medium">No image available</span>
+                      <span className="text-gray-500 font-medium">
+                        No image available
+                      </span>
                     </div>
                   )}
-                  
+
                   {/* Status Badge */}
                   <div className="absolute top-4 left-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      service.status === 'AVAILABLE' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        service.status === "AVAILABLE"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
                       {service.status}
                     </span>
                   </div>
@@ -230,10 +272,10 @@ export default function ServicesPage() {
                         {service.category}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center text-sm text-gray-500">
                       <Clock className="h-4 w-4 mr-2" />
-                      <span>Provider: {service.user?.username || 'N/A'}</span>
+                      <span>Provider: {service.user?.username || "N/A"}</span>
                     </div>
                   </div>
 
@@ -241,7 +283,7 @@ export default function ServicesPage() {
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div>
                       <span className="text-2xl font-bold text-green-600">
-                        LKR {service.price?.toLocaleString() || 'N/A'}
+                        LKR {service.price?.toLocaleString() || "N/A"}
                       </span>
                       {service.originalPrice && (
                         <span className="ml-2 text-sm text-gray-500 line-through">
@@ -249,7 +291,7 @@ export default function ServicesPage() {
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/service/${service.id}`}
