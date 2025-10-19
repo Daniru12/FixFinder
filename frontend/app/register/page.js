@@ -466,7 +466,6 @@ export default function RegisterPage() {
                     >
                       <option value="ROLE_USER">User / Customer</option>
                       <option value="ROLE_PROVIDER">Service Provider</option>
-                      <option value="ROLE_ADMIN">Administrator</option>
                     </select>
                   </div>
 
