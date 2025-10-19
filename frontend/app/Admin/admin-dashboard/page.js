@@ -1,11 +1,24 @@
 'use client';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '../../context/AuthContext';
+import { adminAPI } from '../../utils/api';
+import { Users, Calendar, Briefcase, TrendingUp, Activity, BarChart3, PieChart } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const { user, logout, loading } = useContext(AuthContext);
+  const { user, logout, loading, token } = useContext(AuthContext);
   const router = useRouter();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalBookings: 0,
+    totalServices: 0,
+    activeServices: 0,
+    pendingBookings: 0,
+    completedBookings: 0
+  });
+  const [services, setServices] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     if (!loading) {
@@ -13,9 +26,71 @@ export default function AdminDashboard() {
         router.push('../login');
       } else if (user.role !== 'ROLE_ADMIN') {
         router.push('/');
+      } else {
+        fetchDashboardData();
       }
     }
   }, [user, router, loading]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoadingData(true);
+      // Fetch all data in parallel
+      const [usersRes, servicesRes, bookingsRes] = await Promise.all([
+        adminAPI.getAllUsers(token).catch(() => ({ data: [] })),
+        adminAPI.getAllServices(token).catch(() => ({ data: [] })),
+        adminAPI.getAllBookings(token).catch(() => ({ data: [] }))
+      ]);
+
+      const usersData = usersRes.data || [];
+      const servicesData = servicesRes.data || [];
+      const bookingsData = bookingsRes.data || [];
+
+      setServices(servicesData);
+      setBookings(bookingsData);
+
+      // Calculate statistics
+      setStats({
+        totalUsers: usersData.length,
+        totalBookings: bookingsData.length,
+        totalServices: servicesData.length,
+        activeServices: servicesData.filter(s => s.status === 'ACTIVE').length,
+        pendingBookings: bookingsData.filter(b => b.status === 'PENDING').length,
+        completedBookings: bookingsData.filter(b => b.status === 'COMPLETED').length
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  // Calculate services by category for chart
+  const getServicesByCategory = () => {
+    const categoryCount = {};
+    services.forEach(service => {
+      const category = service.category || 'Uncategorized';
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    });
+    return Object.entries(categoryCount).map(([name, count]) => ({ name, count }));
+  };
+
+  // Calculate booking status distribution
+  const getBookingStatusDistribution = () => {
+    const statusCount = {
+      PENDING: 0,
+      CONFIRMED: 0,
+      COMPLETED: 0,
+      CANCELLED: 0
+    };
+    bookings.forEach(booking => {
+      const status = booking.status || 'PENDING';
+      if (statusCount.hasOwnProperty(status)) {
+        statusCount[status]++;
+      }
+    });
+    return Object.entries(statusCount).map(([name, count]) => ({ name, count }));
+  };
 
   if (loading) {
     return (
@@ -36,46 +111,44 @@ export default function AdminDashboard() {
     );
   }
 
-  const dashboardCards = [
+  const statsCards = [
     {
-      title: 'User Management',
-      description: 'Manage all users and permissions',
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
-      ),
-      route: './users',
+      title: 'Total Users',
+      value: stats.totalUsers,
+      icon: Users,
       gradient: 'from-blue-500 to-blue-600',
-      hoverGradient: 'hover:from-blue-600 hover:to-blue-700',
-      stats: 'View & Edit'
+      bgColor: 'bg-blue-50',
+      iconColor: 'text-blue-600',
+      route: './users'
     },
     {
-      title: 'Booking Management',
-      description: 'View and manage all bookings',
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-      route: './bookings',
+      title: 'Total Bookings',
+      value: stats.totalBookings,
+      icon: Calendar,
       gradient: 'from-green-500 to-emerald-600',
-      hoverGradient: 'hover:from-green-600 hover:to-emerald-700',
-      stats: 'Track All'
+      bgColor: 'bg-green-50',
+      iconColor: 'text-green-600',
+      route: './bookings',
+      subtitle: `${stats.pendingBookings} pending`
     },
     {
-      title: 'Service Management',
-      description: 'Edit and delete services',
-      icon: (
-        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
+      title: 'Total Services',
+      value: stats.totalServices,
+      icon: Briefcase,
+      gradient: 'from-purple-500 to-purple-600',
+      bgColor: 'bg-purple-50',
+      iconColor: 'text-purple-600',
       route: './services',
-      gradient: 'from-cyan-500 to-teal-600',
-      hoverGradient: 'hover:from-cyan-600 hover:to-teal-700',
-      stats: 'Configure'
+      subtitle: `${stats.activeServices} active`
+    },
+    {
+      title: 'Completed',
+      value: stats.completedBookings,
+      icon: TrendingUp,
+      gradient: 'from-orange-500 to-orange-600',
+      bgColor: 'bg-orange-50',
+      iconColor: 'text-orange-600',
+      route: './bookings'
     }
   ];
 
@@ -115,87 +188,172 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {dashboardCards.map((card, index) => (
-            <div
-              key={index}
-              onClick={() => router.push(card.route)}
-              className="group cursor-pointer"
-            >
-              <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
-                <div className={`bg-gradient-to-br ${card.gradient} ${card.hoverGradient} p-6 transition-all duration-300`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {statsCards.map((card, index) => {
+            const IconComponent = card.icon;
+            return (
+              <div
+                key={index}
+                onClick={() => router.push(card.route)}
+                className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1 overflow-hidden"
+              >
+                <div className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="text-white">
-                      {card.icon}
+                    <div className={`${card.bgColor} p-3 rounded-lg`}>
+                      <IconComponent className={`h-6 w-6 ${card.iconColor}`} />
                     </div>
-                    <div className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full">
-                      <span className="text-white text-xs font-semibold">{card.stats}</span>
-                    </div>
+                    {loadingData ? (
+                      <div className="animate-pulse h-8 w-16 bg-gray-200 rounded"></div>
+                    ) : (
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-gray-800">{card.value}</p>
+                      </div>
+                    )}
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-2">{card.title}</h3>
-                  <p className="text-white/90 text-sm">{card.description}</p>
+                  <h3 className="text-gray-600 text-sm font-medium mb-1">{card.title}</h3>
+                  {card.subtitle && (
+                    <p className="text-xs text-gray-500">{card.subtitle}</p>
+                  )}
                 </div>
-                <div className="p-4 bg-gradient-to-br from-gray-50 to-white">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 text-sm font-medium">Manage now</span>
-                    <svg className="w-5 h-5 text-gray-400 group-hover:text-cyan-600 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
+                <div className={`h-1 bg-gradient-to-r ${card.gradient}`}></div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Services by Category Chart */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2 text-cyan-600" />
+                  Services by Category
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">Distribution across categories</p>
               </div>
             </div>
-          ))}
+            {loadingData ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500 border-t-transparent"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {getServicesByCategory().length > 0 ? (
+                  getServicesByCategory().map((item, index) => {
+                    const maxCount = Math.max(...getServicesByCategory().map(i => i.count));
+                    const percentage = (item.count / maxCount) * 100;
+                    const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-pink-500', 'bg-indigo-500'];
+                    return (
+                      <div key={index}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-700">{item.name}</span>
+                          <span className="text-sm font-bold text-gray-800">{item.count}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div
+                            className={`${colors[index % colors.length]} h-3 rounded-full transition-all duration-500`}
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <Activity className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>No service data available</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Booking Status Distribution */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-gray-800 flex items-center">
+                  <PieChart className="h-5 w-5 mr-2 text-green-600" />
+                  Booking Status
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">Current booking distribution</p>
+              </div>
+            </div>
+            {loadingData ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {getBookingStatusDistribution().map((item, index) => {
+                  const total = bookings.length || 1;
+                  const percentage = ((item.count / total) * 100).toFixed(1);
+                  const statusColors = {
+                    PENDING: { bg: 'bg-yellow-500', text: 'text-yellow-700', light: 'bg-yellow-50' },
+                    CONFIRMED: { bg: 'bg-blue-500', text: 'text-blue-700', light: 'bg-blue-50' },
+                    COMPLETED: { bg: 'bg-green-500', text: 'text-green-700', light: 'bg-green-50' },
+                    CANCELLED: { bg: 'bg-red-500', text: 'text-red-700', light: 'bg-red-50' }
+                  };
+                  const color = statusColors[item.name] || statusColors.PENDING;
+                  return (
+                    <div key={index} className={`${color.light} rounded-lg p-4`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`text-sm font-semibold ${color.text}`}>{item.name}</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg font-bold text-gray-800">{item.count}</span>
+                          <span className="text-xs text-gray-500">({percentage}%)</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-white rounded-full h-2">
+                        <div
+                          className={`${color.bg} h-2 rounded-full transition-all duration-500`}
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">Quick Actions</h2>
-              <p className="text-gray-600 mt-1">Frequently used admin functions</p>
+              <h2 className="text-xl font-bold text-gray-800">Quick Actions</h2>
+              <p className="text-gray-600 text-sm mt-1">Manage your platform</p>
             </div>
-            <svg className="w-8 h-8 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-              <div className="text-purple-600 mb-2 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold text-gray-700">Analytics</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={() => router.push('./users')}
+              className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+            >
+              <Users className="h-8 w-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-800">User Management</p>
+              <p className="text-sm text-gray-600 mt-1">Manage all users</p>
             </button>
 
-            <button className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-              <div className="text-orange-600 mb-2 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold text-gray-700">Recent Activity</p>
+            <button
+              onClick={() => router.push('./bookings')}
+              className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+            >
+              <Calendar className="h-8 w-8 text-green-600 mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-800">Bookings</p>
+              <p className="text-sm text-gray-600 mt-1">View all bookings</p>
             </button>
 
-            <button className="p-4 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-              <div className="text-pink-600 mb-2 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold text-gray-700">Notifications</p>
-            </button>
-
-            <button className="p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl hover:shadow-md transition-all duration-200 group">
-              <div className="text-indigo-600 mb-2 group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <p className="text-sm font-semibold text-gray-700">Settings</p>
+            <button
+              onClick={() => router.push('./services')}
+              className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+            >
+              <Briefcase className="h-8 w-8 text-purple-600 mb-3 group-hover:scale-110 transition-transform" />
+              <p className="text-lg font-bold text-gray-800">Services</p>
+              <p className="text-sm text-gray-600 mt-1">Manage services</p>
             </button>
           </div>
         </div>

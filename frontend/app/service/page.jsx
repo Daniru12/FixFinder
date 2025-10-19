@@ -215,9 +215,9 @@ export default function ServicesPage() {
               >
                 {/* Service Image with Overlay */}
                 <div className="relative h-56 w-full overflow-hidden">
-                  {service.images && service.images.length > 0 ? (
+                  {service.images ? (
                     <img
-                      src={service.images[0]}
+                      src={typeof service.images === 'string' ? service.images : service.images[0]}
                       alt={service.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />

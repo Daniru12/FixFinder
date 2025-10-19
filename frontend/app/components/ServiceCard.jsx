@@ -13,7 +13,7 @@ const ServiceCard = ({
   price,
 }) => {
   return (
-    <Link href={`/provider/${id}`} className="group">
+    <Link href={`/service/${id}`} className="group">
       <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
         {/* Image Section */}
         <div className="h-48 overflow-hidden relative">
