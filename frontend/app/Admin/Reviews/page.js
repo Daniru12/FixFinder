@@ -79,7 +79,7 @@ export default function AdminReviewManagement() {
             <p className="text-gray-600 mt-2">Manage all user reviews</p>
           </div>
           <button
-            onClick={() => router.push('/admin-dashboard')}
+            onClick={() => router.push('./admin-dashboard')}
             className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
           >
             Back to Dashboard
