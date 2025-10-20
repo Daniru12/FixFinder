@@ -1,98 +1,16 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   SearchIcon,
-  ShoppingCartIcon,
   SlidersIcon,
   StarIcon,
-  EyeIcon,
 } from 'lucide-react';
 import ProductDetails from '../components/ProductDetails';
+import { productAPI } from '../utils/api';
+import { AuthContext } from '../context/AuthContext';
 
-// Sample product data for FixFinder marketplace (tools, equipment, materials)
-const products = [
-  {
-    id: 1,
-    title: 'Professional Cordless Drill Set',
-    price: 12999,
-    rating: 4.8,
-    provider: 'ToolMaster Lanka',
-    location: 'Colombo',
-    category: 'Power Tools',
-    image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 2,
-    title: 'Heavy-Duty Angle Grinder',
-    price: 8500,
-    rating: 4.6,
-    provider: 'Lanka Hardware Solutions',
-    location: 'Kandy',
-    category: 'Power Tools',
-    image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 3,
-    title: 'Premium Cement (50kg)',
-    price: 2450,
-    rating: 4.7,
-    provider: 'BuildRight Materials',
-    location: 'Galle',
-    category: 'Building Materials',
-    image: 'https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 4,
-    title: 'Complete Plumbing Tool Kit',
-    price: 15999,
-    rating: 4.9,
-    provider: 'Master Plumbers',
-    location: 'Negombo',
-    category: 'Plumbing',
-    image: 'https://images.unsplash.com/photo-1581166397057-235af2b3c6dd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 5,
-    title: 'Electric Circular Saw',
-    price: 9999,
-    rating: 4.5,
-    provider: "Carpenter's Choice",
-    location: 'Colombo',
-    category: 'Power Tools',
-    image: 'https://images.unsplash.com/photo-1613687184123-acd7056e0275?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 6,
-    title: 'Professional Paint Sprayer',
-    price: 18500,
-    rating: 4.7,
-    provider: 'Color Master Lanka',
-    location: 'Jaffna',
-    category: 'Painting',
-    image: 'https://images.unsplash.com/photo-1572981272698-c9b1a56a02b5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 7,
-    title: 'Premium Teak Wood (per cubic ft)',
-    price: 5500,
-    rating: 4.8,
-    provider: 'Lanka Timber House',
-    location: 'Kurunegala',
-    category: 'Building Materials',
-    image: 'https://images.unsplash.com/photo-1520627977056-c307aeb9a625?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-  {
-    id: 8,
-    title: 'Welding Machine Set',
-    price: 24999,
-    rating: 4.9,
-    provider: 'Industrial Tools Lanka',
-    location: 'Ratnapura',
-    category: 'Electrical',
-    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80',
-  },
-];
+// Backend-provided products will be fetched on mount
 
 const categories = [
   'All Tools',
@@ -117,11 +35,42 @@ const locations = [
 
 export default function ProductsPage() {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const [selectedCategory, setSelectedCategory] = useState('All Tools');
   const [priceRange, setPriceRange] = useState(25000);
   const [selectedLocations, setSelectedLocations] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [isFetching, setIsFetching] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setIsFetching(true);
+        const res = await productAPI.getAll();
+        if (!mounted) return;
+        const mapped = (res.data || []).map((p) => ({
+          id: p.id,
+          title: p.name,
+          price: p.price ?? 0,
+          rating: 5.0,
+          provider: p.provider?.username || 'Provider',
+          location: p.provider?.location || 'Colombo',
+          category: p.category || 'General',
+          image: p.imageUrl || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=1000&q=80',
+          raw: p,
+        }));
+        setProducts(mapped);
+      } catch (e) {
+        setProducts([]);
+      } finally {
+        setIsFetching(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   // Handle location checkbox change
   const handleLocationChange = (location) => {
@@ -132,7 +81,7 @@ export default function ProductsPage() {
   };
 
   // Filter products based on category, price, and location
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = useMemo(() => products.filter((product) => {
     // Filter by category
     const categoryMatch =
       selectedCategory === 'All Tools' || product.category === selectedCategory;
@@ -149,7 +98,7 @@ export default function ProductsPage() {
       product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.provider.toLowerCase().includes(searchTerm.toLowerCase());
     return categoryMatch && priceMatch && locationMatch && searchMatch;
-  });
+  }), [products, selectedCategory, priceRange, selectedLocations, searchTerm]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50">
@@ -284,11 +233,16 @@ export default function ProductsPage() {
         {/* Products Grid */}
         <div className="flex-1">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.length > 0 ? (
+            {isFetching ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">Loading products...</p>
+              </div>
+            ) : filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
                 <div
                   key={product.id}
-                  className="bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px] border border-white/50 group"
+                  onClick={() => setSelectedProduct(product)}
+                  className="bg-white/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px] border border-white/50 group cursor-pointer"
                 >
                   <div className="h-48 overflow-hidden relative">
                     <img
@@ -320,22 +274,27 @@ export default function ProductsPage() {
                     <p className="text-blue-600 font-bold text-xl mb-4">
                       Rs. {product.price.toLocaleString()}
                     </p>
-                    {/* Action buttons */}
-                    <div className="flex items-center justify-end gap-3">
-                      <button
-                        className="p-2 rounded-lg flex items-center justify-center text-white transition-all duration-300 bg-blue-600 hover:bg-blue-700"
-                        aria-label="Add to cart"
-                      >
-                        <ShoppingCartIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => setSelectedProduct(product)}
-                        className="p-2 rounded-lg flex items-center justify-center text-white transition-all duration-300 bg-purple-600 hover:bg-purple-700"
-                        aria-label="View details"
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
-                    </div>
+                    {/* Buy Now Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Navigate to shipping address page with product info including default quantity
+                        const params = new URLSearchParams({
+                          productId: product.id,
+                          productName: product.title,
+                          productPrice: product.price.toString(),
+                          quantity: '1', // Default quantity
+                          stockQuantity: (product.stockQuantity || 10).toString(),
+                        });
+                        router.push(`/checkout/shipping?${params.toString()}`);
+                      }}
+                      className="w-full py-2.5 px-4 rounded-lg text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                      style={{
+                        background: 'linear-gradient(to right, #10b981, #059669, #047857)',
+                      }}
+                    >
+                      Buy Now
+                    </button>
                   </div>
                 </div>
               ))

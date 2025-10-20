@@ -4,7 +4,11 @@ import com.example.BGF.models.Order;
 import com.example.BGF.models.User;
 import com.example.BGF.models.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -40,4 +44,10 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     
     // Find orders by product ordered by order date descending
     List<Order> findByProductOrderByOrderDateDesc(Product product);
+    
+    // Custom delete method using native query to bypass foreign key constraints
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM orders WHERE id = :orderId", nativeQuery = true)
+    void deleteOrderById(@Param("orderId") Long orderId);
 }

@@ -480,18 +480,43 @@ export default function ProviderDashboard() {
       </div>
 
       {/* Navigation Cards */}
-      <div className="p-6 bg-white shadow rounded-xl hover:shadow-lg transition">
-  <h3 className="text-lg font-semibold text-gray-800 mb-2">Manage Services</h3>
-  <p className="text-gray-600 text-sm mb-4">
-    Add, edit, or remove the services you provide.
-  </p>
-  <button
-    onClick={() => router.push('./providerServices')}
-    className="px-4 py-2 bg-teal-600 text-white text-sm rounded-md hover:bg-teal-700"
-  >
-    Go to Services
-  </button>
-</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Manage Services */}
+        <div className="p-6 bg-white shadow rounded-xl hover:shadow-lg transition">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Manage Services</h3>
+          <p className="text-gray-600 text-sm mb-4">
+            Add, edit, or remove the services you provide.
+          </p>
+          <button
+            onClick={() => router.push('./providerServices')}
+            className="px-4 py-2 bg-teal-600 text-white text-sm rounded-md hover:bg-teal-700"
+          >
+            Go to Services
+          </button>
+        </div>
+
+        {/* Manage Products */}
+        <div className="p-6 bg-white shadow rounded-xl hover:shadow-lg transition">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Manage Products</h3>
+          <p className="text-gray-600 text-sm mb-4">
+            Create, edit, or remove products you sell.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => router.push('/products/my-products')}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+            >
+              My Products
+            </button>
+            <button
+              onClick={() => router.push('/products/create')}
+              className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
+            >
+              Create Product
+            </button>
+          </div>
+        </div>
+      </div>
 
     </div>
   );

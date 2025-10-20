@@ -15,6 +15,7 @@ export default function Navbar() {
         {user ? (
           <>
             <span>Welcome, {user.username} ({user.role})</span>
+            <Link href="/User/my-orders" style={{ marginLeft: '10px' }}>My Orders</Link>
             <button onClick={logout} style={{ marginLeft: '10px' }}>Logout</button>
           </>
         ) : (

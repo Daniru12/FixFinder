@@ -22,7 +22,7 @@ public class ProductController {
     @PostMapping("/create")
     public ResponseEntity<Product> createProduct(@RequestBody Product product, @AuthenticationPrincipal User user) {
         // Check if user is ADMIN or has a service type (service provider)
-        if (!"ADMIN".equals(user.getRole()) && (user.getServiceType() == null || user.getServiceType().isEmpty())) {
+        if (!"ADMIN".equals(user.getRole()) && !"ROLE_ADMIN".equals(user.getRole()) && (user.getServiceType() == null || user.getServiceType().isEmpty())) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(productService.createProduct(product, user));
@@ -70,7 +70,7 @@ public class ProductController {
         try {
             // Check if user is the product owner or admin
             Product existingProduct = productService.getProductById(id);
-            if (!"ADMIN".equals(user.getRole()) && !existingProduct.getProvider().getId().equals(user.getId())) {
+            if (!"ADMIN".equals(user.getRole()) && !"ROLE_ADMIN".equals(user.getRole()) && !existingProduct.getProvider().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().build();
             }
             return ResponseEntity.ok(productService.updateProduct(id, product));
@@ -85,7 +85,7 @@ public class ProductController {
         try {
             // Check if user is the product owner or admin
             Product existingProduct = productService.getProductById(id);
-            if (!"ADMIN".equals(user.getRole()) && !existingProduct.getProvider().getId().equals(user.getId())) {
+            if (!"ADMIN".equals(user.getRole()) && !"ROLE_ADMIN".equals(user.getRole()) && !existingProduct.getProvider().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().build();
             }
             return ResponseEntity.ok(productService.updateStock(id, stock));
@@ -100,7 +100,7 @@ public class ProductController {
         try {
             // Check if user is the product owner or admin
             Product existingProduct = productService.getProductById(id);
-            if (!"ADMIN".equals(user.getRole()) && !existingProduct.getProvider().getId().equals(user.getId())) {
+            if (!"ADMIN".equals(user.getRole()) && !"ROLE_ADMIN".equals(user.getRole()) && !existingProduct.getProvider().getId().equals(user.getId())) {
                 return ResponseEntity.badRequest().build();
             }
             productService.deleteProduct(id);
@@ -113,7 +113,7 @@ public class ProductController {
     // Admin endpoints
     @GetMapping("/admin/all")
     public ResponseEntity<List<Product>> getAllProductsForAdmin(@AuthenticationPrincipal User user) {
-        if (!"ADMIN".equals(user.getRole())) {
+        if (!"ADMIN".equals(user.getRole()) && !"ROLE_ADMIN".equals(user.getRole())) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(productService.getAllProducts());
@@ -121,7 +121,7 @@ public class ProductController {
 
     @GetMapping("/admin/provider/{providerId}")
     public ResponseEntity<List<Product>> getProductsByProviderForAdmin(@PathVariable Long providerId, @AuthenticationPrincipal User user) {
-        if (!"ADMIN".equals(user.getRole())) {
+        if (!"ADMIN".equals(user.getRole()) && !"ROLE_ADMIN".equals(user.getRole())) {
             return ResponseEntity.badRequest().build();
         }
         // You would need to create a method to get user by ID in UserService
