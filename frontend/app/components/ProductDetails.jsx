@@ -1,10 +1,12 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon, CreditCardIcon, StarIcon, PackageIcon } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 export default function ProductDetails({ product, onBack }) {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const [quantity, setQuantity] = useState(1);
   
   // Get stock quantity from product (default to 10 if not available)
@@ -165,6 +167,12 @@ export default function ProductDetails({ product, onBack }) {
               <button
                 onClick={() => {
                   if (!isInStock) return;
+                  
+                  // Check if user is logged in
+                  if (!user) {
+                    router.push('/register');
+                    return;
+                  }
                   
                   // Navigate to shipping address page with product info including quantity
                   const params = new URLSearchParams({

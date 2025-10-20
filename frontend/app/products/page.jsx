@@ -43,6 +43,9 @@ export default function ProductsPage() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
+  const [showQuantityPopup, setShowQuantityPopup] = useState(false);
+  const [selectedProductForPurchase, setSelectedProductForPurchase] = useState(null);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   useEffect(() => {
     let mounted = true;
@@ -51,6 +54,8 @@ export default function ProductsPage() {
         setIsFetching(true);
         const res = await productAPI.getAll();
         if (!mounted) return;
+        console.log('Raw API Response:', res.data);
+        console.log('First product raw data:', res.data?.[0]);
         const mapped = (res.data || []).map((p) => ({
           id: p.id,
           title: p.name,
@@ -60,6 +65,7 @@ export default function ProductsPage() {
           location: p.provider?.location || 'Colombo',
           category: p.category || 'General',
           image: p.imageUrl || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=1000&q=80',
+          stockQuantity: p.stockQuantity ?? 0,
           raw: p,
         }));
         setProducts(mapped);
@@ -278,22 +284,28 @@ export default function ProductsPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Navigate to shipping address page with product info including default quantity
-                        const params = new URLSearchParams({
-                          productId: product.id,
-                          productName: product.title,
-                          productPrice: product.price.toString(),
-                          quantity: '1', // Default quantity
-                          stockQuantity: (product.stockQuantity || 10).toString(),
-                        });
-                        router.push(`/checkout/shipping?${params.toString()}`);
+                        // Check if user is logged in
+                        if (!user) {
+                          router.push('/register');
+                          return;
+                        }
+                        setSelectedProductForPurchase(product);
+                        setSelectedQuantity(1);
+                        setShowQuantityPopup(true);
                       }}
-                      className="w-full py-2.5 px-4 rounded-lg text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                      disabled={!user || !product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0}
+                      className={`w-full py-2.5 px-4 rounded-lg text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                        !user || !product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0 
+                          ? 'opacity-50 cursor-not-allowed' 
+                          : ''
+                      }`}
                       style={{
-                        background: 'linear-gradient(to right, #10b981, #059669, #047857)',
+                        background: (!product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0)
+                          ? '#9ca3af' // Gray for out of stock
+                          : 'linear-gradient(to right, #10b981, #059669, #047857)', // Green for buy now
                       }}
                     >
-                      Buy Now
+                      {(!product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0) ? 'Out of Stock' : 'Buy Now'}
                     </button>
                   </div>
                 </div>
@@ -316,6 +328,115 @@ export default function ProductsPage() {
             product={selectedProduct} 
             onBack={() => setSelectedProduct(null)} 
           />
+        </div>
+      )}
+
+      {/* Quantity Selection Popup */}
+      {showQuantityPopup && selectedProductForPurchase && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800">Select Quantity</h3>
+              <button
+                onClick={() => setShowQuantityPopup(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="mb-6">
+              <div className="flex items-center gap-4 mb-4">
+                <img
+                  src={selectedProductForPurchase.image}
+                  alt={selectedProductForPurchase.title}
+                  className="w-16 h-16 object-cover rounded-lg"
+                />
+                <div>
+                  <h4 className="font-semibold text-gray-800">{selectedProductForPurchase.title}</h4>
+                  <p className="text-blue-600 font-bold">Rs. {selectedProductForPurchase.price.toLocaleString()}</p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Available Stock:</span>
+                  <span className={`font-semibold ${
+                    (Number(selectedProductForPurchase.stockQuantity) || 0) > 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {Number(selectedProductForPurchase.stockQuantity) || 0} units
+                  </span>
+                </div>
+                {(Number(selectedProductForPurchase.stockQuantity) || 0) <= 0 && (
+                  <div className="mt-2 text-center">
+                    <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
+                      Out of Stock
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quantity
+              </label>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
+                  disabled={selectedQuantity <= 1}
+                  className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  -
+                </button>
+                <span className="text-xl font-semibold min-w-[3rem] text-center">
+                  {selectedQuantity}
+                </span>
+                <button
+                  onClick={() => setSelectedQuantity(Math.min(Number(selectedProductForPurchase.stockQuantity) || 0, selectedQuantity + 1))}
+                  disabled={selectedQuantity >= (Number(selectedProductForPurchase.stockQuantity) || 0)}
+                  className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 mb-6">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Total Amount:</span>
+                <span className="text-xl font-bold text-blue-600">
+                  Rs. {(selectedProductForPurchase.price * selectedQuantity).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowQuantityPopup(false)}
+                className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    productId: selectedProductForPurchase.id,
+                    productName: selectedProductForPurchase.title,
+                    productPrice: selectedProductForPurchase.price.toString(),
+                    quantity: selectedQuantity.toString(),
+                    stockQuantity: (selectedProductForPurchase.stockQuantity || 0).toString(),
+                  });
+                  router.push(`/checkout/shipping?${params.toString()}`);
+                  setShowQuantityPopup(false);
+                }}
+                disabled={selectedQuantity <= 0 || selectedQuantity > (Number(selectedProductForPurchase.stockQuantity) || 0)}
+                className="flex-1 py-2 px-4 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                Continue to Checkout
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,11 +1,11 @@
 'use client';
 import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon, PackageIcon, ClockIcon, CheckCircleIcon, XCircleIcon, TruckIcon, AlertCircleIcon, TrashIcon } from 'lucide-react';
+import { ArrowLeftIcon, PackageIcon, ClockIcon, CheckCircleIcon, XCircleIcon, TruckIcon, AlertCircleIcon } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { orderAPI } from '../../utils/api';
 
-export default function MyOrdersPage() {
+export default function ProviderOrdersPage() {
   const router = useRouter();
   const { user, token } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
@@ -14,61 +14,31 @@ export default function MyOrdersPage() {
 
   useEffect(() => {
     if (user && token) {
-      fetchMyOrders();
+      fetchProviderOrders();
     }
   }, [user, token]);
 
-  const fetchMyOrders = async () => {
+  const fetchProviderOrders = async () => {
     try {
       setLoading(true);
-      const response = await orderAPI.getMyOrders(token);
+      const response = await orderAPI.getProviderOrders(token);
       setOrders(response.data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error('Error fetching provider orders:', error);
       setError('Failed to load orders. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const canCancelOrder = (orderDate) => {
-    // Can cancel orders within 24 hours
-    const orderTime = new Date(orderDate);
-    const now = new Date();
-    const hoursDiff = (now - orderTime) / (1000 * 60 * 60);
-    return hoursDiff <= 24 && orderDate; // Can cancel within 24 hours
-  };
-
-  const cancelOrder = async (orderId) => {
-    if (!confirm('Are you sure you want to cancel this order? The order status will be changed to CANCELLED.')) {
-      return;
-    }
-
+  const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      const response = await orderAPI.updateStatus(orderId, 'CANCELLED', token);
-      if (response.data) {
-        alert('Order cancelled successfully!');
-        fetchMyOrders(); // Refresh the orders list
-      }
+      await orderAPI.updateStatus(orderId, newStatus, token);
+      alert(`Order status updated to ${newStatus} successfully!`);
+      fetchProviderOrders(); // Refresh the orders list
     } catch (error) {
-      console.error('Error cancelling order:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to cancel order. Please try again.';
-      alert(`Error: ${errorMessage}`);
-    }
-  };
-
-  const deleteOrder = async (orderId) => {
-    if (!confirm('Are you sure you want to permanently delete this cancelled order? This action cannot be undone.')) {
-      return;
-    }
-
-    try {
-      const response = await orderAPI.delete(orderId, token);
-      alert('Order deleted successfully!');
-      fetchMyOrders(); // Refresh the orders list
-    } catch (error) {
-      console.error('Error deleting order:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to delete order. Please try again.';
+      console.error('Error updating order status:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to update order status. Please try again.';
       alert(`Error: ${errorMessage}`);
     }
   };
@@ -107,6 +77,19 @@ export default function MyOrdersPage() {
     }
   };
 
+  const getNextStatus = (currentStatus) => {
+    switch (currentStatus?.toUpperCase()) {
+      case 'PENDING':
+        return 'CONFIRMED';
+      case 'CONFIRMED':
+        return 'SHIPPED';
+      case 'SHIPPED':
+        return 'DELIVERED';
+      default:
+        return null;
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -136,7 +119,7 @@ export default function MyOrdersPage() {
           <h2 className="text-xl font-bold text-red-600 mb-4 text-center">Error</h2>
           <p className="text-gray-700 mb-6 text-center">{error}</p>
           <button
-            onClick={fetchMyOrders}
+            onClick={fetchProviderOrders}
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
@@ -163,7 +146,7 @@ export default function MyOrdersPage() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
                 My Orders
               </h1>
-              <p className="text-gray-600 mt-1">Track and manage your orders</p>
+              <p className="text-gray-600 mt-1">Orders for your products</p>
             </div>
           </div>
         </div>
@@ -173,12 +156,12 @@ export default function MyOrdersPage() {
           <div className="bg-white/80 backdrop-blur-sm rounded-xl p-12 shadow-lg border border-white/50 text-center">
             <PackageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-800 mb-2">No Orders Yet</h2>
-            <p className="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+            <p className="text-gray-600 mb-6">You haven't received any orders for your products yet.</p>
             <button
-              onClick={() => router.push('/products')}
+              onClick={() => router.push('/products/my-products')}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all duration-300"
             >
-              Browse Products
+              Manage Products
             </button>
           </div>
         ) : (
@@ -205,26 +188,15 @@ export default function MyOrdersPage() {
                         <span className="font-medium capitalize">{order.status}</span>
                       </div>
                       
-                      {/* Delete Button - Only for CANCELLED orders */}
-                      {order.status?.toUpperCase() === 'CANCELLED' && (
+                      {/* Update Status Button - Only for non-delivered, non-cancelled orders */}
+                      {order.status?.toUpperCase() !== 'DELIVERED' && 
+                       order.status?.toUpperCase() !== 'CANCELLED' && 
+                       getNextStatus(order.status) && (
                         <button
-                          onClick={() => deleteOrder(order.id)}
-                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex items-center gap-2"
+                          onClick={() => updateOrderStatus(order.id, getNextStatus(order.status))}
+                          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
                         >
-                          <TrashIcon className="h-4 w-4" />
-                          Delete Order
-                        </button>
-                      )}
-                      
-                      {/* Cancel Order Button - Only for non-cancelled, non-delivered orders within 24 hours */}
-                      {order.status?.toUpperCase() !== 'CANCELLED' && 
-                       order.status?.toUpperCase() !== 'DELIVERED' && 
-                       canCancelOrder(order.orderDate) && (
-                        <button
-                          onClick={() => cancelOrder(order.id)}
-                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium"
-                        >
-                          Cancel Order
+                          Mark as {getNextStatus(order.status)}
                         </button>
                       )}
                     </div>
@@ -261,10 +233,14 @@ export default function MyOrdersPage() {
                       </div>
                     </div>
 
-                    {/* Shipping Information */}
+                    {/* Customer Information */}
                     <div>
-                      <h4 className="font-semibold text-gray-800 mb-3">Shipping Details</h4>
+                      <h4 className="font-semibold text-gray-800 mb-3">Customer Details</h4>
                       <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Customer:</span>
+                          <span className="font-medium">{order.customer?.username || 'N/A'}</span>
+                        </div>
                         <div className="flex justify-between">
                           <span className="text-gray-600">Payment Method:</span>
                           <span className="font-medium">{order.paymentMethod || 'COD'}</span>
@@ -286,21 +262,6 @@ export default function MyOrdersPage() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Cancellation Notice */}
-                  {order.status?.toUpperCase() !== 'CANCELLED' && 
-                   order.status?.toUpperCase() !== 'DELIVERED' && 
-                   !canCancelOrder(order.orderDate) && (
-                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <ClockIcon className="h-4 w-4 text-yellow-600" />
-                        <span className="text-sm text-yellow-800">
-                          Cancellation period has expired (24 hours from order placement)
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
                 </div>
               </div>
             ))}
