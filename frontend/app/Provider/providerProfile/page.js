@@ -495,11 +495,11 @@ export default function ProviderDashboard() {
           </button>
         </div>
 
-        {/* Manage Products */}
+        {/* Product and Order Management */}
         <div className="p-6 bg-white shadow rounded-xl hover:shadow-lg transition">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Manage Products</h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Product and Order Management</h3>
           <p className="text-gray-600 text-sm mb-4">
-            Create, edit, or remove products you sell.
+            Manage your products and track your orders.
           </p>
           <div className="flex gap-2">
             <button
@@ -509,10 +509,10 @@ export default function ProviderDashboard() {
               My Products
             </button>
             <button
-              onClick={() => router.push('/products/create')}
+              onClick={() => router.push('/Provider/providerOrders')}
               className="px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
             >
-              Create Product
+              My Orders
             </button>
           </div>
         </div>
