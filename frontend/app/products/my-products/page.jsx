@@ -245,8 +245,8 @@ export default function MyProductsPage() {
               <p className="text-gray-600 mt-1">Track performance and manage your product portfolio</p>
             </div>
             <div className="mt-4 sm:mt-0">
-              <button
-                onClick={() => router.push('/products/create')}
+            <button
+              onClick={() => router.push('/products/create')}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg"
               >
                 <PlusIcon className="h-5 w-5" /> Add New Product
@@ -499,40 +499,40 @@ export default function MyProductsPage() {
                     className={`p-2 ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400'}`}
                   >
                     <List className="h-4 w-4" />
-                  </button>
+            </button>
                 </div>
               </div>
-            </div>
           </div>
+        </div>
 
           <div className="p-6">
-            {error && (
-              <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                {error}
-              </div>
-            )}
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error}
+          </div>
+        )}
 
-            {loading ? (
-              <div className="text-center py-12">
+        {loading ? (
+          <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="text-gray-500 mt-4">Loading your products...</p>
-              </div>
+          </div>
             ) : sortedProducts.length === 0 ? (
-              <div className="text-center py-12">
+          <div className="text-center py-12">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-500 mb-4">
                   {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all' 
                     ? 'No products match your filters.' 
                     : 'You haven\'t created any products yet.'}
                 </p>
-                <button
-                  onClick={() => router.push('/products/create')}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  <PlusIcon className="h-4 w-4" /> Create Your First Product
-                </button>
-              </div>
-            ) : (
+            <button
+              onClick={() => router.push('/products/create')}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700"
+            >
+              <PlusIcon className="h-4 w-4" /> Create Your First Product
+            </button>
+          </div>
+        ) : (
               <div className={viewMode === 'grid' 
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" 
                 : "space-y-4"
@@ -540,25 +540,25 @@ export default function MyProductsPage() {
                 {sortedProducts.map((product) => (
                   viewMode === 'grid' ? (
                     // Grid View
-                    <div
-                      key={product.id}
+              <div
+                key={product.id}
                       className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300"
-                    >
-                      <div className="h-48 overflow-hidden relative">
-                        <img
-                          src={product.imageUrl || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=1000&q=80'}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
+              >
+                <div className="h-48 overflow-hidden relative">
+                  <img
+                    src={product.imageUrl || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=1000&q=80'}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
                         <div className="absolute top-3 right-3">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             product.status === 'ACTIVE' 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-gray-100 text-gray-800'
                           }`}>
-                            {product.status}
-                          </span>
-                        </div>
+                      {product.status}
+                    </span>
+                  </div>
                         {product.stockQuantity < 10 && (
                           <div className="absolute top-3 left-3">
                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
@@ -566,22 +566,22 @@ export default function MyProductsPage() {
                             </span>
                           </div>
                         )}
-                      </div>
-                      <div className="p-4">
+                </div>
+                <div className="p-4">
                         <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">
-                          {product.name}
-                        </h3>
+                    {product.name}
+                  </h3>
                         <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                          {product.description}
-                        </p>
+                    {product.description}
+                  </p>
                         <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
                           <span className="font-medium">{product.category}</span>
-                          <span>Stock: {product.stockQuantity}</span>
-                        </div>
+                    <span>Stock: {product.stockQuantity}</span>
+                  </div>
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-xl font-bold text-gray-900">
-                            Rs. {Number(product.price || 0).toLocaleString()}
-                          </p>
+                    Rs. {Number(product.price || 0).toLocaleString()}
+                  </p>
                           <div className="flex items-center">
                             <Star className="h-4 w-4 text-yellow-400 fill-current" />
                             <span className="text-sm text-gray-600 ml-1">
@@ -589,11 +589,11 @@ export default function MyProductsPage() {
                             </span>
                           </div>
                         </div>
-                        
-                        {/* Action buttons */}
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => router.push(`/products/${product.id}`)}
+                  
+                  {/* Action buttons */}
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => router.push(`/products/${product.id}`)}
                             className="p-2 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
                             aria-label="View product"
                           >
@@ -669,31 +669,31 @@ export default function MyProductsPage() {
                           <button
                             onClick={() => router.push(`/products/${product.id}`)}
                             className="p-2 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
-                            aria-label="View product"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => router.push(`/products/${product.id}/edit`)}
+                      aria-label="View product"
+                    >
+                      <EyeIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => router.push(`/products/${product.id}/edit`)}
                             className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
-                            aria-label="Edit product"
-                          >
-                            <EditIcon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(product)}
+                      aria-label="Edit product"
+                    >
+                      <EditIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(product)}
                             className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
-                            aria-label="Delete product"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                ))}
+                      aria-label="Delete product"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            )}
+                  )
+            ))}
+          </div>
+        )}
           </div>
         </div>
 
