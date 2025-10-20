@@ -134,8 +134,28 @@ public class OrderService {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
 
+        String previousStatus = order.getStatus();
         order.setStatus(status);
         order.setUpdatedAt(java.time.LocalDateTime.now());
+
+        // Handle stock management based on status changes
+        if ("CANCELLED".equals(previousStatus) && "PENDING".equals(status)) {
+            // Order is being reactivated - reduce product stock
+            System.out.println("Order reactivated from CANCELLED to PENDING - reducing product stock");
+            updateProductStock(order.getProduct(), order.getQuantity());
+        } else if ("PENDING".equals(previousStatus) && "CANCELLED".equals(status)) {
+            // Order is being cancelled - restore product stock
+            System.out.println("Order cancelled from PENDING to CANCELLED - restoring product stock");
+            restoreProductStock(order.getProduct(), order.getQuantity());
+        } else if ("CONFIRMED".equals(previousStatus) && "CANCELLED".equals(status)) {
+            // Order is being cancelled from CONFIRMED - restore product stock
+            System.out.println("Order cancelled from CONFIRMED to CANCELLED - restoring product stock");
+            restoreProductStock(order.getProduct(), order.getQuantity());
+        } else if ("SHIPPED".equals(previousStatus) && "CANCELLED".equals(status)) {
+            // Order is being cancelled from SHIPPED - restore product stock
+            System.out.println("Order cancelled from SHIPPED to CANCELLED - restoring product stock");
+            restoreProductStock(order.getProduct(), order.getQuantity());
+        }
 
         return orderRepository.save(order);
     }

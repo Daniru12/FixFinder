@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeftIcon, PackageIcon, ClockIcon, CheckCircleIcon, XCircleIcon, TruckIcon, AlertCircleIcon } from 'lucide-react';
+import { ArrowLeftIcon, PackageIcon, ClockIcon, CheckCircleIcon, XCircleIcon, TruckIcon, AlertCircleIcon, TrashIcon } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
 import { orderAPI } from '../../utils/api';
 
@@ -32,6 +32,7 @@ export default function MyOrdersPage() {
   };
 
   const canCancelOrder = (orderDate) => {
+    // Can cancel orders within 24 hours
     const orderTime = new Date(orderDate);
     const now = new Date();
     const hoursDiff = (now - orderTime) / (1000 * 60 * 60);
@@ -39,21 +40,35 @@ export default function MyOrdersPage() {
   };
 
   const cancelOrder = async (orderId) => {
-    if (!confirm('Are you sure you want to cancel this order? This action cannot be undone and the order will be permanently deleted.')) {
+    if (!confirm('Are you sure you want to cancel this order? The order status will be changed to CANCELLED.')) {
       return;
     }
 
     try {
-      const response = await orderAPI.cancel(orderId, token);
-      if (response.data?.message) {
-        alert(response.data.message);
-      } else {
-        alert('Order cancelled and deleted successfully!');
+      const response = await orderAPI.updateStatus(orderId, 'CANCELLED', token);
+      if (response.data) {
+        alert('Order cancelled successfully!');
+        fetchMyOrders(); // Refresh the orders list
       }
-      fetchMyOrders(); // Refresh the orders list
     } catch (error) {
       console.error('Error cancelling order:', error);
       const errorMessage = error.response?.data?.error || 'Failed to cancel order. Please try again.';
+      alert(`Error: ${errorMessage}`);
+    }
+  };
+
+  const deleteOrder = async (orderId) => {
+    if (!confirm('Are you sure you want to permanently delete this cancelled order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await orderAPI.delete(orderId, token);
+      alert('Order deleted successfully!');
+      fetchMyOrders(); // Refresh the orders list
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to delete order. Please try again.';
       alert(`Error: ${errorMessage}`);
     }
   };
@@ -189,6 +204,19 @@ export default function MyOrdersPage() {
                         {getStatusIcon(order.status)}
                         <span className="font-medium capitalize">{order.status}</span>
                       </div>
+                      
+                      {/* Delete Button - Only for CANCELLED orders */}
+                      {order.status?.toUpperCase() === 'CANCELLED' && (
+                        <button
+                          onClick={() => deleteOrder(order.id)}
+                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium flex items-center gap-2"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                          Delete Order
+                        </button>
+                      )}
+                      
+                      {/* Cancel Order Button - Only for non-cancelled, non-delivered orders within 24 hours */}
                       {order.status?.toUpperCase() !== 'CANCELLED' && 
                        order.status?.toUpperCase() !== 'DELIVERED' && 
                        canCancelOrder(order.orderDate) && (
@@ -272,6 +300,7 @@ export default function MyOrdersPage() {
                       </div>
                     </div>
                   )}
+
                 </div>
               </div>
             ))}

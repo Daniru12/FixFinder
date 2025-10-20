@@ -192,16 +192,16 @@ export default function OrderConfirmationPage() {
             
             <div className="flex gap-4 justify-center">
               <button
-                onClick={() => router.push('/products')}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Continue Shopping
-              </button>
-              <button
-                onClick={() => router.push('/products/my-products')}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => router.push('/User/my-orders')}
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg font-medium"
               >
                 View My Orders
+              </button>
+              <button
+                onClick={() => router.push('/products')}
+                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Continue Shopping
               </button>
             </div>
           </div>
