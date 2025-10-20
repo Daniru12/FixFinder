@@ -14,7 +14,8 @@ export default function Reviews({ serviceId }) {
     const fetchReviews = async () => {
       try {
         // Fetch all reviews for the service
-        const res = await axios.get(`http://localhost:8080/reviews/service/${serviceId}`);
+        const res = await axios.get(`http://localhost:8080/reviews/service/${serviceId}/approved`);
+
         setReviews(res.data || []);
 
         // Fetch average rating for the service

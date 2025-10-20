@@ -361,7 +361,7 @@ export default function AdminDashboard() {
 
     {/* ✅ Reviews Button */}
     <button
-      onClick={() => router.push('./reviews')}
+      onClick={() => router.push('./Reviews')}
       className="p-6 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
     >
       <BarChart3 className="h-8 w-8 text-pink-600 mb-3 group-hover:scale-110 transition-transform" />
