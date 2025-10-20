@@ -321,42 +321,56 @@ export default function AdminDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-800">Quick Actions</h2>
-              <p className="text-gray-600 text-sm mt-1">Manage your platform</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button
-              onClick={() => router.push('./users')}
-              className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
-            >
-              <Users className="h-8 w-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
-              <p className="text-lg font-bold text-gray-800">User Management</p>
-              <p className="text-sm text-gray-600 mt-1">Manage all users</p>
-            </button>
+   {/* Quick Actions */}
+<div className="bg-white rounded-xl shadow-md p-6">
+  <div className="flex items-center justify-between mb-6">
+    <div>
+      <h2 className="text-xl font-bold text-gray-800">Quick Actions</h2>
+      <p className="text-gray-600 text-sm mt-1">Manage your platform</p>
+    </div>
+  </div>
 
-            <button
-              onClick={() => router.push('./bookings')}
-              className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
-            >
-              <Calendar className="h-8 w-8 text-green-600 mb-3 group-hover:scale-110 transition-transform" />
-              <p className="text-lg font-bold text-gray-800">Bookings</p>
-              <p className="text-sm text-gray-600 mt-1">View all bookings</p>
-            </button>
+  {/* Updated grid to 4 columns */}
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <button
+      onClick={() => router.push('./users')}
+      className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+    >
+      <Users className="h-8 w-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
+      <p className="text-lg font-bold text-gray-800">User Management</p>
+      <p className="text-sm text-gray-600 mt-1">Manage all users</p>
+    </button>
 
-            <button
-              onClick={() => router.push('./services')}
-              className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
-            >
-              <Briefcase className="h-8 w-8 text-purple-600 mb-3 group-hover:scale-110 transition-transform" />
-              <p className="text-lg font-bold text-gray-800">Services</p>
-              <p className="text-sm text-gray-600 mt-1">Manage services</p>
-            </button>
-          </div>
-        </div>
+    <button
+      onClick={() => router.push('./bookings')}
+      className="p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+    >
+      <Calendar className="h-8 w-8 text-green-600 mb-3 group-hover:scale-110 transition-transform" />
+      <p className="text-lg font-bold text-gray-800">Bookings</p>
+      <p className="text-sm text-gray-600 mt-1">View all bookings</p>
+    </button>
+
+    <button
+      onClick={() => router.push('./services')}
+      className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+    >
+      <Briefcase className="h-8 w-8 text-purple-600 mb-3 group-hover:scale-110 transition-transform" />
+      <p className="text-lg font-bold text-gray-800">Services</p>
+      <p className="text-sm text-gray-600 mt-1">Manage services</p>
+    </button>
+
+    {/* ✅ Reviews Button */}
+    <button
+      onClick={() => router.push('./Reviews')}
+      className="p-6 bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+    >
+      <BarChart3 className="h-8 w-8 text-pink-600 mb-3 group-hover:scale-110 transition-transform" />
+      <p className="text-lg font-bold text-gray-800">Reviews</p>
+      <p className="text-sm text-gray-600 mt-1">View and manage reviews</p>
+    </button>
+  </div>
+</div>
+
       </div>
     </div>
   );

@@ -44,6 +44,12 @@ export default function ReviewForm() {
       setMessage("✅ Review submitted successfully!");
       setRating(5);
       setComment("");
+
+// Redirect to the service details page after 2 seconds
+setTimeout(() => {
+  window.location.href = `/service/${serviceId}`;
+}, 2000);
+
     } catch (err) {
       console.error(err);
       setMessage(`❌ ${err.message}`);
