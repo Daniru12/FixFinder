@@ -22,7 +22,12 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  X
+  X,
+  XCircle,
+  Users,
+  Calendar,
+  MapPin,
+  FileText
 } from 'lucide-react';
 
 export default function MyProductsPage() {
@@ -32,6 +37,7 @@ export default function MyProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [viewProduct, setViewProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -593,7 +599,7 @@ export default function MyProductsPage() {
                   {/* Action buttons */}
                   <div className="flex items-center justify-end gap-2">
                     <button
-                      onClick={() => router.push(`/products/${product.id}`)}
+                      onClick={() => setViewProduct(product)}
                             className="p-2 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
                             aria-label="View product"
                           >
@@ -667,7 +673,7 @@ export default function MyProductsPage() {
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => router.push(`/products/${product.id}`)}
+                            onClick={() => setViewProduct(product)}
                             className="p-2 rounded-lg text-green-600 hover:bg-green-50 transition-colors"
                       aria-label="View product"
                     >
@@ -724,6 +730,222 @@ export default function MyProductsPage() {
                 >
                   Delete Product
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Product Details Modal */}
+        {viewProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-white/20 p-2 rounded-lg">
+                      <Package className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Product Details</h2>
+                      <p className="text-blue-100 text-sm">Your product information</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setViewProduct(null)}
+                    className="text-white/80 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
+                  >
+                    <XCircle className="h-6 w-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Left Column - Product Image & Basic Info */}
+                  <div className="space-y-6">
+                    {/* Product Image */}
+                    <div className="relative">
+                      <img
+                        src={viewProduct.imageUrl || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=1000&q=80'}
+                        alt={viewProduct.name}
+                        className="w-full h-80 object-cover rounded-xl shadow-lg"
+                      />
+                      <div className="absolute top-4 right-4">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          viewProduct.status === 'ACTIVE' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {viewProduct.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Basic Information */}
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-600" />
+                        Basic Information
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                          <span className="text-gray-600 font-medium">Product Name</span>
+                          <span className="text-gray-900 font-semibold">{viewProduct.name}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                          <span className="text-gray-600 font-medium">Category</span>
+                          <span className="text-gray-900 font-semibold">{viewProduct.category}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                          <span className="text-gray-600 font-medium">Price</span>
+                          <span className="text-2xl font-bold text-green-600">
+                            Rs. {Number(viewProduct.price || 0).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-gray-600 font-medium">Stock Quantity</span>
+                          <span className={`font-semibold ${
+                            viewProduct.stockQuantity < 10 ? 'text-orange-600' : 'text-gray-900'
+                          }`}>
+                            {viewProduct.stockQuantity} units
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column - Detailed Information */}
+                  <div className="space-y-6">
+                    {/* Product Description */}
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-gray-600" />
+                        Description
+                      </h3>
+                      <p className="text-gray-700 leading-relaxed">
+                        {viewProduct.description || 'No description provided'}
+                      </p>
+                    </div>
+
+                    {/* Additional Details */}
+                    <div className="bg-gray-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-purple-600" />
+                        Additional Details
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                          <span className="text-gray-600 font-medium">Product ID</span>
+                          <span className="text-gray-900 font-mono text-sm">#{viewProduct.id}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                          <span className="text-gray-600 font-medium">Location</span>
+                          <span className="text-gray-900 font-semibold flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {viewProduct.location || 'Not specified'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-gray-600 font-medium">Created Date</span>
+                          <span className="text-gray-900 font-semibold">
+                            {viewProduct.createdAt ? new Date(viewProduct.createdAt).toLocaleDateString() : 'Unknown'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stock Status */}
+                    <div className={`rounded-xl p-6 ${
+                      viewProduct.stockQuantity < 10 
+                        ? 'bg-orange-50 border border-orange-200' 
+                        : 'bg-green-50 border border-green-200'
+                    }`}>
+                      <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                        viewProduct.stockQuantity < 10 ? 'text-orange-800' : 'text-green-800'
+                      }`}>
+                        <AlertCircle className={`h-5 w-5 ${
+                          viewProduct.stockQuantity < 10 ? 'text-orange-600' : 'text-green-600'
+                        }`} />
+                        Stock Status
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <span className={`font-semibold ${
+                          viewProduct.stockQuantity < 10 ? 'text-orange-800' : 'text-green-800'
+                        }`}>
+                          {viewProduct.stockQuantity < 10 ? 'Low Stock Alert' : 'Stock Available'}
+                        </span>
+                        <span className={`text-2xl font-bold ${
+                          viewProduct.stockQuantity < 10 ? 'text-orange-600' : 'text-green-600'
+                        }`}>
+                          {viewProduct.stockQuantity}
+                        </span>
+                      </div>
+                      <p className={`text-sm mt-2 ${
+                        viewProduct.stockQuantity < 10 ? 'text-orange-600' : 'text-green-600'
+                      }`}>
+                        {viewProduct.stockQuantity < 10 
+                          ? 'This product needs restocking soon' 
+                          : 'Product is well stocked'
+                        }
+                      </p>
+                    </div>
+
+                    {/* Performance Metrics */}
+                    <div className="bg-blue-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5 text-blue-600" />
+                        Performance
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center py-2 border-b border-blue-200">
+                          <span className="text-gray-600 font-medium">Status</span>
+                          <span className={`font-semibold ${
+                            viewProduct.status === 'ACTIVE' ? 'text-green-600' : 'text-gray-600'
+                          }`}>
+                            {viewProduct.status}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-2">
+                          <span className="text-gray-600 font-medium">Visibility</span>
+                          <span className="text-gray-900 font-semibold">
+                            {viewProduct.status === 'ACTIVE' ? 'Public' : 'Hidden'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>Product ID: #{viewProduct.id}</span>
+                    <span>•</span>
+                    <span>Status: {viewProduct.status}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setViewProduct(null)}
+                      className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button
+                      onClick={() => {
+                        setViewProduct(null);
+                        router.push(`/products/${viewProduct.id}/edit`);
+                      }}
+                      className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
+                      <EditIcon className="h-4 w-4" />
+                      Edit Product
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
