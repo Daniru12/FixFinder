@@ -125,6 +125,13 @@ export const adminAPI = {
     return API.post('/users', userData, {
       headers: { Authorization: `Bearer ${token}` }
     });
+  },
+
+  // Get all bookings
+  getAllBookings: (token) => {
+    return API.get('/api/bookings', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
   }
 };
 

@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { adminAPI } from '../../utils/api';
+import { Edit2, Trash2, X, Save, Eye, User, DollarSign, Tag, AlertCircle } from 'lucide-react';
 
 export default function AdminServiceManagement() {
   const { user, token, loading: authLoading } = useContext(AuthContext);
@@ -11,6 +12,7 @@ export default function AdminServiceManagement() {
   const [error, setError] = useState(null);
   const [editingService, setEditingService] = useState(null);
   const [editFormData, setEditFormData] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export default function AdminServiceManagement() {
       status: service.status,
       images: service.images
     });
+    setIsModalOpen(true);
   };
 
   const handleEditSubmit = async (e) => {
@@ -53,6 +56,7 @@ export default function AdminServiceManagement() {
       await adminAPI.updateService(editingService, editFormData, token);
       setEditingService(null);
       setEditFormData({});
+      setIsModalOpen(false);
       loadServices(); // Reload services
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update service');
@@ -73,6 +77,7 @@ export default function AdminServiceManagement() {
   const handleCancelEdit = () => {
     setEditingService(null);
     setEditFormData({});
+    setIsModalOpen(false);
   };
 
   if (authLoading) {
@@ -124,182 +129,245 @@ export default function AdminServiceManagement() {
           </h2>
         </div>
 
-        {/* Services Grid */}
+        {/* Services Table */}
         {services.length === 0 ? (
-          <div className="text-center py-20">
+          <div className="text-center py-20 bg-white rounded-lg shadow">
+            <AlertCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 text-lg">No services found in the system.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="bg-white shadow-md rounded-2xl p-6 hover:shadow-lg transition"
-              >
-                {editingService === service.id ? (
-                  // Edit Form
-                  <form onSubmit={handleEditSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Service Name
-                      </label>
-                      <input
-                        type="text"
-                        value={editFormData.name || ''}
-                        onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Description
-                      </label>
-                      <textarea
-                        value={editFormData.description || ''}
-                        onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        rows="3"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Price ($)
-                      </label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={editFormData.price || ''}
-                        onChange={(e) => setEditFormData({...editFormData, price: parseFloat(e.target.value)})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Category
-                      </label>
-                      <input
-                        type="text"
-                        value={editFormData.category || ''}
-                        onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                      </label>
-                      <select
-                        value={editFormData.status || ''}
-                        onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      >
-                        <option value="ACTIVE">Active</option>
-                        <option value="INACTIVE">Inactive</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="SUSPENDED">Suspended</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Image URL
-                      </label>
-                      <input
-                        type="url"
-                        value={editFormData.images || ''}
-                        onChange={(e) => setEditFormData({...editFormData, images: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      />
-                    </div>
-                    
-                    <div className="flex space-x-2">
-                      <button
-                        type="submit"
-                        className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
-                      >
-                        Save Changes
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCancelEdit}
-                        className="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  // Display Mode
-                  <>
-                    {/* Service Image */}
-                    {service.images && (
-                      <img
-                        src={service.images}
-                        alt={service.name}
-                        className="w-full h-40 object-cover rounded-lg mb-4"
-                      />
-                    )}
-                    
-                    {/* Service Info */}
-                    <div className="mb-4">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">{service.name}</h3>
-                      <p className="text-gray-600 text-sm mb-3">{service.description}</p>
-                      
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="font-medium text-gray-700">Price:</span>
-                          <span className="text-green-600 font-bold">${service.price}</span>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Image
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Service Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Price
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Provider
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {services.map((service) => (
+                    <tr key={service.id} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        #{service.id}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {service.images ? (
+                          <img
+                            src={service.images}
+                            alt={service.name}
+                            className="h-12 w-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                            <Eye className="h-5 w-5 text-gray-400" />
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-gray-900">{service.name}</div>
+                        <div className="text-sm text-gray-500 truncate max-w-xs">{service.description}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {service.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm font-semibold text-green-600">
+                          <DollarSign className="h-4 w-4" />
+                          {service.price?.toLocaleString() || 'N/A'}
                         </div>
-                        <div className="flex justify-between">
-                          <span className="font-medium text-gray-700">Category:</span>
-                          <span className="text-blue-600">{service.category}</span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm text-gray-900">
+                          <User className="h-4 w-4 mr-1 text-gray-400" />
+                          {service.user?.username || 'N/A'}
                         </div>
-                        <div className="flex justify-between">
-                          <span className="font-medium text-gray-700">Status:</span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            service.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                            service.status === 'INACTIVE' ? 'bg-gray-100 text-gray-800' :
-                            service.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {service.status}
-                          </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          service.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                          service.status === 'INACTIVE' ? 'bg-gray-100 text-gray-800' :
+                          service.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {service.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditClick(service)}
+                            className="text-blue-600 hover:text-blue-900 transition"
+                            title="Edit Service"
+                          >
+                            <Edit2 className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(service.id)}
+                            className="text-red-600 hover:text-red-900 transition"
+                            title="Delete Service"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="font-medium text-gray-700">Provider:</span>
-                          <span className="text-purple-600">{service.user?.username || 'N/A'}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="font-medium text-gray-700">Service ID:</span>
-                          <span className="text-gray-500">#{service.id}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Action Buttons */}
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditClick(service)}
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(service.id)}
-                        className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </>
-                )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-2xl">
+                <h2 className="text-2xl font-bold text-gray-800">Edit Service</h2>
+                <button
+                  onClick={handleCancelEdit}
+                  className="text-gray-400 hover:text-gray-600 transition"
+                >
+                  <X className="h-6 w-6" />
+                </button>
               </div>
-            ))}
+              
+              <form onSubmit={handleEditSubmit} className="p-6 space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Service Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name || ''}
+                    onChange={(e) => setEditFormData({...editFormData, name: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                  </label>
+                  <textarea
+                    value={editFormData.description || ''}
+                    onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    rows="4"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Price (LKR)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editFormData.price || ''}
+                      onChange={(e) => setEditFormData({...editFormData, price: parseFloat(e.target.value)})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Category
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.category || ''}
+                      onChange={(e) => setEditFormData({...editFormData, category: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Status
+                  </label>
+                  <select
+                    value={editFormData.status || ''}
+                    onChange={(e) => setEditFormData({...editFormData, status: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="SUSPENDED">Suspended</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Image URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editFormData.images || ''}
+                    onChange={(e) => setEditFormData({...editFormData, images: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {editFormData.images && (
+                    <div className="mt-2">
+                      <img
+                        src={editFormData.images}
+                        alt="Preview"
+                        className="h-32 w-32 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => e.target.style.display = 'none'}
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition font-medium"
+                  >
+                    <Save className="h-5 w-5 mr-2" />
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="flex-1 px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

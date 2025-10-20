@@ -1,57 +1,43 @@
-import React from 'react';
+'use client';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 import ServiceCard from './ServiceCard';
 
-// Sample featured services data
-const featuredServices = [
-  {
-    id: '1',
-    name: "John's Plumbing Solutions",
-    category: 'Plumbing',
-    image:
-      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2069&q=80',
-    rating: 4.8,
-    reviewCount: 124,
-    location: 'New York, NY',
-    price: '$50/hr',
-  },
-  {
-    id: '2',
-    name: 'ElectriTech Services',
-    category: 'Electrical',
-    image:
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2069&q=80',
-    rating: 4.7,
-    reviewCount: 98,
-    location: 'Chicago, IL',
-    price: '$65/hr',
-  },
-  {
-    id: '3',
-    name: "Mike's Carpentry",
-    category: 'Carpentry',
-    image:
-      'https://images.unsplash.com/photo-1601564921647-b446262b08f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80',
-    rating: 4.9,
-    reviewCount: 87,
-    location: 'Austin, TX',
-    price: '$55/hr',
-  },
-  {
-    id: '4',
-    name: 'Cool Air AC Repair',
-    category: 'AC Repair',
-    image:
-      'https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80',
-    rating: 4.6,
-    reviewCount: 112,
-    location: 'Miami, FL',
-    price: '$70/hr',
-  },
-];
-
 const FeaturedServices = () => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchFeaturedServices();
+  }, []);
+
+  const fetchFeaturedServices = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:8080/services/user/all');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch services');
+      }
+      
+      const data = await response.json();
+      
+      // Filter only active services and limit to 4 for featured section
+      const activeServices = data
+        .filter(service => service.status === 'ACTIVE')
+        .slice(0, 4);
+      
+      setServices(activeServices);
+    } catch (err) {
+      console.error('Error fetching featured services:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,7 +47,7 @@ const FeaturedServices = () => {
             Featured Service Providers
           </h2>
           <Link
-            href="/services"
+            href="/service"
             className="flex items-center text-teal-600 hover:text-teal-700 font-medium transition-colors"
           >
             View All
@@ -69,12 +55,59 @@ const FeaturedServices = () => {
           </Link>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+            <span className="ml-3 text-gray-600">Loading featured services...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <div className="text-center py-12">
+            <p className="text-red-600 mb-4">Failed to load services. Please try again later.</p>
+            <button
+              onClick={fetchFeaturedServices}
+              className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Service Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredServices.map((service) => (
-            <ServiceCard key={service.id} {...service} />
-          ))}
-        </div>
+        {!loading && !error && (
+          <>
+            {services.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-600 text-lg">No featured services available at the moment.</p>
+                <Link
+                  href="/service"
+                  className="inline-block mt-4 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
+                >
+                  Browse All Services
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {services.map((service) => (
+                  <ServiceCard 
+                    key={service.id} 
+                    id={service.id}
+                    name={service.name}
+                    category={service.category}
+                    image={service.images}
+                    rating={service.rating || 0}
+                    reviewCount={0}
+                    location={service.user?.username || 'Provider'}
+                    price={`LKR ${service.price?.toLocaleString() || 'N/A'}`}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </section>
   );
