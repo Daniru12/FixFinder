@@ -26,7 +26,11 @@ import {
   Star,
   Calendar,
   MapPin,
-  FileText
+  FileText,
+  Download,
+  FileDown,
+  Printer,
+  Loader2
 } from 'lucide-react';
 
 export default function AdminProductsPage() {
@@ -42,6 +46,7 @@ export default function AdminProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [providerFilter, setProviderFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
+  const [generatingReport, setGeneratingReport] = useState(false);
   const [analytics, setAnalytics] = useState({
     totalProducts: 0,
     activeProducts: 0,
@@ -158,6 +163,477 @@ export default function AdminProductsPage() {
     return [...new Set(categories)];
   };
 
+  const generatePDFReport = async () => {
+    try {
+      setGeneratingReport(true);
+      
+      // Get current date for report
+      const currentDate = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      // Calculate additional analytics for the report
+      const totalProducts = products.length;
+      const activeProducts = products.filter(p => p.status === 'ACTIVE').length;
+      const inactiveProducts = products.filter(p => p.status === 'INACTIVE').length;
+      const lowStockProducts = products.filter(p => p.stockQuantity < 10).length;
+      
+      const validOrders = orders.filter(o => o.status !== 'CANCELLED');
+      const totalRevenue = validOrders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+      const totalOrders = orders.length;
+      
+      const uniqueProviders = new Set(products.map(p => p.provider?.id || p.provider?.username)).size;
+      
+      // Category breakdown
+      const categoryCount = {};
+      products.forEach(product => {
+        const category = product.category || 'Uncategorized';
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+      });
+      const topCategories = Object.entries(categoryCount)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      
+      // Provider breakdown
+      const providerCount = {};
+      products.forEach(product => {
+        const provider = product.provider?.username || 'Unknown';
+        providerCount[provider] = (providerCount[provider] || 0) + 1;
+      });
+      const topProviders = Object.entries(providerCount)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+      
+      // Generate HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Product Management Report - ${currentDate}</title>
+          <meta charset="UTF-8">
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            body {
+              font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+              line-height: 1.6;
+              color: #1f2937;
+              background: #ffffff;
+              padding: 0;
+            }
+            
+            .container {
+              max-width: 1200px;
+              margin: 0 auto;
+              padding: 40px 30px;
+            }
+            
+            .header {
+              background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #dc2626 100%);
+              color: white;
+              padding: 40px 30px;
+              text-align: center;
+              margin-bottom: 40px;
+              border-radius: 16px;
+              box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+            
+            .header h1 {
+              font-size: 36px;
+              font-weight: 800;
+              margin-bottom: 8px;
+              letter-spacing: -0.025em;
+            }
+            
+            .header p {
+              font-size: 18px;
+              opacity: 0.9;
+              font-weight: 500;
+            }
+            
+            .section {
+              margin-bottom: 50px;
+              page-break-inside: avoid;
+            }
+            
+            .section-title {
+              font-size: 24px;
+              font-weight: 700;
+              color: #1f2937;
+              margin-bottom: 30px;
+              padding-bottom: 12px;
+              border-bottom: 3px solid #3b82f6;
+              position: relative;
+            }
+            
+            .section-title::after {
+              content: '';
+              position: absolute;
+              bottom: -3px;
+              left: 0;
+              width: 60px;
+              height: 3px;
+              background: #dc2626;
+            }
+            
+            .stats-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+              gap: 24px;
+              margin-bottom: 40px;
+            }
+            
+            .stat-card {
+              background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+              padding: 32px 24px;
+              border-radius: 16px;
+              text-align: center;
+              border: 1px solid #e2e8f0;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              transition: all 0.3s ease;
+              position: relative;
+              overflow: hidden;
+            }
+            
+            .stat-card::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 4px;
+              background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ef4444);
+            }
+            
+            .stat-number {
+              font-size: 42px;
+              font-weight: 900;
+              color: #1e40af;
+              margin-bottom: 8px;
+              line-height: 1;
+            }
+            
+            .stat-label {
+              color: #64748b;
+              font-size: 16px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .chart-section {
+              background: #ffffff;
+              border: 1px solid #e5e7eb;
+              border-radius: 16px;
+              padding: 32px;
+              margin: 30px 0;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+            
+            .chart-item {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 16px 0;
+              border-bottom: 1px solid #f3f4f6;
+            }
+            
+            .chart-item:last-child {
+              border-bottom: none;
+            }
+            
+            .chart-item-name {
+              font-weight: 600;
+              color: #374151;
+              font-size: 16px;
+            }
+            
+            .chart-item-value {
+              font-weight: 700;
+              color: #1e40af;
+              font-size: 16px;
+            }
+            
+            .chart-bar {
+              height: 8px;
+              background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+              border-radius: 4px;
+              margin: 8px 0;
+              transition: all 0.3s ease;
+            }
+            
+            .table-container {
+              background: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+              border: 1px solid #e5e7eb;
+            }
+            
+            .table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 14px;
+            }
+            
+            .table thead {
+              background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            }
+            
+            .table th {
+              color: white;
+              padding: 20px 16px;
+              text-align: left;
+              font-weight: 700;
+              font-size: 14px;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .table td {
+              padding: 16px;
+              border-bottom: 1px solid #f3f4f6;
+              vertical-align: middle;
+            }
+            
+            .table tbody tr {
+              transition: background-color 0.2s ease;
+            }
+            
+            .table tbody tr:hover {
+              background-color: #f8fafc;
+            }
+            
+            .table tbody tr:nth-child(even) {
+              background-color: #f9fafb;
+            }
+            
+            .status-badge {
+              padding: 6px 12px;
+              border-radius: 20px;
+              font-size: 12px;
+              font-weight: 700;
+              text-transform: uppercase;
+              letter-spacing: 0.05em;
+            }
+            
+            .status-active {
+              background-color: #dcfce7;
+              color: #166534;
+            }
+            
+            .status-inactive {
+              background-color: #fee2e2;
+              color: #991b1b;
+            }
+            
+            .low-stock {
+              color: #dc2626;
+              font-weight: 700;
+            }
+            
+            .normal-stock {
+              color: #059669;
+              font-weight: 600;
+            }
+            
+            .footer {
+              margin-top: 60px;
+              padding: 30px;
+              background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+              border-radius: 16px;
+              text-align: center;
+              border: 1px solid #e2e8f0;
+            }
+            
+            .footer p {
+              color: #64748b;
+              font-size: 14px;
+              margin-bottom: 8px;
+            }
+            
+            .footer p:last-child {
+              margin-bottom: 0;
+            }
+            
+            .summary-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+              gap: 20px;
+              margin: 30px 0;
+            }
+            
+            .summary-item {
+              background: #ffffff;
+              padding: 24px;
+              border-radius: 12px;
+              border: 1px solid #e5e7eb;
+              text-align: center;
+            }
+            
+            .summary-item h3 {
+              font-size: 18px;
+              font-weight: 700;
+              color: #374151;
+              margin-bottom: 12px;
+            }
+            
+            .summary-item p {
+              font-size: 14px;
+              color: #6b7280;
+              line-height: 1.5;
+            }
+            
+            @media print {
+              body { margin: 0; padding: 0; }
+              .container { padding: 20px; }
+              .section { page-break-inside: avoid; }
+              .header { margin-bottom: 30px; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>📊 Product Management Report</h1>
+              <p>Comprehensive Analytics & Inventory Overview • Generated on ${currentDate}</p>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Executive Summary</h2>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-number">${totalProducts}</div>
+                  <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${activeProducts}</div>
+                  <div class="stat-label">Active Products</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${inactiveProducts}</div>
+                  <div class="stat-label">Inactive Products</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">Rs. ${totalRevenue.toLocaleString()}</div>
+                  <div class="stat-label">Total Revenue</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${totalOrders}</div>
+                  <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${uniqueProviders}</div>
+                  <div class="stat-label">Active Providers</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-number">${lowStockProducts}</div>
+                  <div class="stat-label">Low Stock Items</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Category Performance</h2>
+              <div class="chart-section">
+                ${topCategories.map(category => `
+                  <div class="chart-item">
+                    <span class="chart-item-name">${category.name}</span>
+                    <span class="chart-item-value">${category.count} products</span>
+                  </div>
+                  <div class="chart-bar" style="width: ${(category.count / Math.max(...topCategories.map(c => c.count))) * 100}%"></div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Provider Performance</h2>
+              <div class="chart-section">
+                ${topProviders.map(provider => `
+                  <div class="chart-item">
+                    <span class="chart-item-name">${provider.name}</span>
+                    <span class="chart-item-value">${provider.count} products</span>
+                  </div>
+                  <div class="chart-bar" style="width: ${(provider.count / Math.max(...topProviders.map(p => p.count))) * 100}%"></div>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="section">
+              <h2 class="section-title">Product Inventory</h2>
+              <div class="table-container">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Product Name</th>
+                      <th>Category</th>
+                      <th>Provider</th>
+                      <th>Price</th>
+                      <th>Stock</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${products.slice(0, 50).map(product => `
+                      <tr>
+                        <td><strong>${product.name}</strong></td>
+                        <td>${product.category || 'N/A'}</td>
+                        <td>${product.provider?.username || 'Unknown'}</td>
+                        <td><strong>Rs. ${Number(product.price || 0).toLocaleString()}</strong></td>
+                        <td class="${product.stockQuantity < 10 ? 'low-stock' : 'normal-stock'}">${product.stockQuantity}</td>
+                        <td><span class="status-badge status-${product.status?.toLowerCase()}">${product.status}</span></td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+                ${products.length > 50 ? `<div style="padding: 20px; text-align: center; color: #6b7280; font-style: italic;">... and ${products.length - 50} more products</div>` : ''}
+              </div>
+            </div>
+
+            <div class="footer">
+              <p><strong>FixFinder Admin Dashboard</strong> • Automated Report Generation</p>
+              <p>For technical support or questions, contact the system administrator</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      // Create a blob with the HTML content
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      
+      // Create a temporary URL for the blob
+      const url = URL.createObjectURL(blob);
+      
+      // Create a temporary anchor element for download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Product_Management_Report_${new Date().toISOString().split('T')[0]}.html`;
+      
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL
+      URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error generating PDF report:', error);
+      setError('Failed to generate PDF report. Please try again.');
+    } finally {
+      setGeneratingReport(false);
+    }
+  };
+
   if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -201,6 +677,23 @@ export default function AdminProductsPage() {
               >
                 <RefreshCw className="h-4 w-4" />
                 Refresh
+              </button>
+              <button
+                onClick={generatePDFReport}
+                disabled={generatingReport}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {generatingReport ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    Download Report
+                  </>
+                )}
               </button>
             <button
               onClick={() => router.push('/products/create')}
