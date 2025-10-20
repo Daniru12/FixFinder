@@ -330,8 +330,8 @@ export default function AdminDashboard() {
     </div>
   </div>
 
-  {/* Updated grid to 4 columns */}
-  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+  {/* Updated grid to 5 columns */}
+  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
     <button
       onClick={() => router.push('./users')}
       className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
@@ -339,6 +339,15 @@ export default function AdminDashboard() {
       <Users className="h-8 w-8 text-blue-600 mb-3 group-hover:scale-110 transition-transform" />
       <p className="text-lg font-bold text-gray-800">User Management</p>
       <p className="text-sm text-gray-600 mt-1">Manage all users</p>
+    </button>
+
+    <button
+      onClick={() => router.push('./products')}
+      className="p-6 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl hover:shadow-lg transition-all duration-200 group text-left"
+    >
+      <Activity className="h-8 w-8 text-indigo-600 mb-3 group-hover:scale-110 transition-transform" />
+      <p className="text-lg font-bold text-gray-800">Product Management</p>
+      <p className="text-sm text-gray-600 mt-1">Manage all products</p>
     </button>
 
     <button
