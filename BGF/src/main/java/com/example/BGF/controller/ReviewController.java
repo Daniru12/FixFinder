@@ -46,7 +46,7 @@ public class ReviewController {
     // Delete Review
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
-        return reviewService.deleteReview(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+        return reviewService.deleteReviewByAdmin(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     // Get Reviews by Service
@@ -67,5 +67,33 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getAverageRating(serviceId));
     }
 
-    
+
+    // Get all reviews (for admin dashboard)
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Review>> getAllReviewsForAdmin() {
+        return ResponseEntity.ok(reviewService.getAllReviews());
+    }
+
+    // Approve review (admin only)
+    @PutMapping("/admin/approve/{id}")
+    public ResponseEntity<Review> approveReview(@PathVariable Long id) {
+        Review approvedReview = reviewService.approveReview(id);
+        return approvedReview != null ? ResponseEntity.ok(approvedReview) : ResponseEntity.notFound().build();
+    }
+
+    // Get only approved reviews for a service (for public display)
+    @GetMapping("/service/{serviceId}/approved")
+    public ResponseEntity<List<Review>> getApprovedReviews(@PathVariable Long serviceId) {
+        return ResponseEntity.ok(reviewService.getApprovedReviewsByService(serviceId));
+    }
+
+
+    // Delete review (admin only)
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteReviewByAdmin(@PathVariable Long id) {
+        boolean deleted = reviewService.deleteReviewByAdmin(id);
+        return deleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+
 }

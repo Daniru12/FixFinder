@@ -1,17 +1,43 @@
-import React from 'react';
-import Link from 'next/link';
-import { Star, MapPin } from 'lucide-react';
+"use client";
+
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { Star, MapPin } from "lucide-react";
+import axios from "axios";
 
 const ServiceCard = ({
   id,
   name,
   category,
   image,
-  rating,
-  reviewCount,
   location,
   price,
 }) => {
+  const [rating, setRating] = useState(0);
+  const [reviewCount, setReviewCount] = useState(0);
+
+  useEffect(() => {
+    const fetchRating = async () => {
+      try {
+        // Fetch approved reviews for this service
+        const res = await axios.get(`http://localhost:8080/reviews/service/${id}/approved`);
+        const reviews = res.data || [];
+        setReviewCount(reviews.length);
+
+        if (reviews.length > 0) {
+          const avg = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+          setRating(avg);
+        } else {
+          setRating(0);
+        }
+      } catch (err) {
+        console.error("Failed to fetch reviews for service:", err);
+      }
+    };
+
+    fetchRating();
+  }, [id]);
+
   return (
     <Link href={`/service/${id}`} className="group">
       <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -41,8 +67,8 @@ const ServiceCard = ({
                   size={16}
                   className={
                     i < Math.floor(rating)
-                      ? 'text-yellow-400 fill-yellow-400'
-                      : 'text-gray-300'
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-gray-300"
                   }
                 />
               ))}

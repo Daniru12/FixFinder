@@ -18,6 +18,19 @@ public class Review {
 
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private boolean approved = false;
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+
+
     // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -31,6 +44,7 @@ public class Review {
     public Review() {
         this.createdAt = LocalDateTime.now();
     }
+
 
     // --- Getters & Setters ---
     public Long getId() { return id; }
