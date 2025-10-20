@@ -284,23 +284,28 @@ export default function ProductsPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
+                        // Check if user is logged in
+                        if (!user) {
+                          router.push('/register');
+                          return;
+                        }
                         setSelectedProductForPurchase(product);
                         setSelectedQuantity(1);
                         setShowQuantityPopup(true);
                       }}
-                      disabled={!product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0}
+                      disabled={!user || !product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0}
                       className={`w-full py-2.5 px-4 rounded-lg text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 ${
-                        !product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0 
+                        !user || !product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0 
                           ? 'opacity-50 cursor-not-allowed' 
                           : ''
                       }`}
                       style={{
-                        background: !product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0 
-                          ? '#9ca3af' 
-                          : 'linear-gradient(to right, #10b981, #059669, #047857)',
+                        background: (!product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0)
+                          ? '#9ca3af' // Gray for out of stock
+                          : 'linear-gradient(to right, #10b981, #059669, #047857)', // Green for buy now
                       }}
                     >
-                      {!product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0 ? 'Out of Stock' : 'Buy Now'}
+                      {(!product.stockQuantity || product.stockQuantity === 0 || Number(product.stockQuantity) <= 0) ? 'Out of Stock' : 'Buy Now'}
                     </button>
                   </div>
                 </div>
