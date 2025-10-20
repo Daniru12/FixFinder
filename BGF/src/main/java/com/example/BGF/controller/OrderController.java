@@ -83,7 +83,15 @@ public class OrderController {
     // READ - Get my orders (customer's own orders)
     @GetMapping("/my-orders")
     public ResponseEntity<List<Order>> getMyOrders(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(orderService.getOrdersByCustomer(user));
+        System.out.println("=== GET MY ORDERS DEBUG ===");
+        System.out.println("User: " + user.getUsername() + " (ID: " + user.getId() + ")");
+        List<Order> orders = orderService.getOrdersByCustomer(user);
+        System.out.println("Found " + orders.size() + " orders for user");
+        for (Order order : orders) {
+            System.out.println("Order ID: " + order.getId() + ", Status: " + order.getStatus() + ", Product: " + (order.getProduct() != null ? order.getProduct().getName() : "null"));
+        }
+        System.out.println("=========================");
+        return ResponseEntity.ok(orders);
     }
 
     // READ - Get orders for my products (provider's orders)
@@ -140,20 +148,56 @@ public class OrderController {
         }
     }
 
-    // UPDATE - Update order status (provider and admin only)
+    // UPDATE - Update order status
     @PutMapping("/{id}/status")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestParam String status, @AuthenticationPrincipal User user) {
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Long id, @RequestParam String status, @AuthenticationPrincipal User user) {
         try {
-            Order existingOrder = orderService.getOrderById(id);
+            System.out.println("=== UPDATE ORDER STATUS DEBUG ===");
+            System.out.println("Order ID: " + id);
+            System.out.println("New Status: " + status);
+            System.out.println("User: " + user.getUsername() + " (Role: " + user.getRole() + ")");
             
-            // Check if user is the provider or admin
-            if (!"ADMIN".equals(user.getRole()) && !existingOrder.getProduct().getProvider().getId().equals(user.getId())) {
-                return ResponseEntity.badRequest().build();
+            Order existingOrder = orderService.getOrderById(id);
+            System.out.println("Found Order: " + existingOrder);
+            System.out.println("Current Status: " + existingOrder.getStatus());
+            System.out.println("Customer ID: " + existingOrder.getCustomer().getId());
+            System.out.println("User ID: " + user.getId());
+            
+            // Check if user is the customer, provider, or admin
+            boolean isCustomer = existingOrder.getCustomer().getId().equals(user.getId());
+            boolean isProvider = existingOrder.getProduct().getProvider().getId().equals(user.getId());
+            boolean isAdmin = "ADMIN".equals(user.getRole());
+            
+            System.out.println("Is Customer: " + isCustomer);
+            System.out.println("Is Provider: " + isProvider);
+            System.out.println("Is Admin: " + isAdmin);
+            
+            // Allow customers to change order status to CANCELLED only
+            if (isCustomer && "CANCELLED".equals(status)) {
+                System.out.println("Customer cancelling order - ALLOWED");
+                Order updatedOrder = orderService.updateOrderStatus(id, status);
+                System.out.println("Order cancelled successfully: " + updatedOrder.getStatus());
+                return ResponseEntity.ok(updatedOrder);
             }
             
-            return ResponseEntity.ok(orderService.updateOrderStatus(id, status));
+            // Allow providers and admins to change any status
+            if (isProvider || isAdmin) {
+                System.out.println("Provider/Admin changing status - ALLOWED");
+                Order updatedOrder = orderService.updateOrderStatus(id, status);
+                System.out.println("Order updated successfully: " + updatedOrder.getStatus());
+                return ResponseEntity.ok(updatedOrder);
+            }
+            
+            System.out.println("Access DENIED - returning 400");
+            return ResponseEntity.badRequest().body(Map.of("error", "Access denied. Customers can only cancel orders, providers can change shipping status."));
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            System.out.println("RuntimeException: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", "Order not found or access denied: " + e.getMessage()));
+        } catch (Exception e) {
+            System.out.println("Unexpected Exception: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", "Unexpected error: " + e.getMessage()));
         }
     }
 
