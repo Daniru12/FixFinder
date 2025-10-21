@@ -211,6 +211,12 @@ export const productAPI = {
   // Public: get product by id
   getById: (id) => API.get(`/products/${id}`),
 
+  // Get user's own products (provider)
+  getMyProducts: (token) =>
+    API.get('/products/my-products', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
   // Provider/Admin: create product
   create: (product, token) =>
     API.post('/products/create', product, {
