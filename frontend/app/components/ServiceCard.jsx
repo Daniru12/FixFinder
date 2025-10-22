@@ -20,12 +20,13 @@ const ServiceCard = ({
     const fetchRating = async () => {
       try {
         // Fetch approved reviews for this service
-        const res = await axios.get(`http://localhost:8080/reviews/service/${id}/approved`);
+        const res = await axios.get(`http://localhost:8080/reviews/service/${id}`);
         const reviews = res.data || [];
         setReviewCount(reviews.length);
 
         if (reviews.length > 0) {
-          const avg = reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length;
+          const avg =
+          reviews.reduce((acc, r) => acc + (Number(r.rating) || 0), 0) / reviews.length;
           setRating(avg);
         } else {
           setRating(0);
