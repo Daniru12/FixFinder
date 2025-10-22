@@ -85,6 +85,44 @@ export default function UserManagement() {
     router.push('./createUser');
   };
 
+  const downloadCSV = () => {
+    // Prepare CSV headers
+    const headers = ['ID', 'Username', 'Full Name', 'Email', 'Phone', 'Role', 'Service Type', 'Address', 'Available', 'Created Date'];
+    
+    // Prepare CSV rows from filtered users
+    const rows = filteredUsers.map(u => [
+      u.id || '',
+      u.username || '',
+      u.fullName || '',
+      u.email || '',
+      u.phone || '',
+      u.role?.replace('ROLE_', '') || '',
+      u.serviceType || '',
+      u.address ? `"${u.address.replace(/"/g, '""')}"` : '', // Escape quotes in address
+      u.role === 'ROLE_PROVIDER' ? (u.available ? 'Yes' : 'No') : 'N/A',
+      u.createdAt ? new Date(u.createdAt).toLocaleDateString() : ''
+    ]);
+    
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `users_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Filter users based on search term and role filter
   const filteredUsers = users.filter(u => {
     const matchesSearch = u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,6 +159,16 @@ export default function UserManagement() {
               className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
             >
               Back to Dashboard
+            </button>
+            <button
+              onClick={downloadCSV}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center space-x-2"
+              disabled={filteredUsers.length === 0}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>Download CSV</span>
             </button>
             <button
               onClick={handleCreateUser}
