@@ -15,17 +15,7 @@ public class ReviewService {
 
     // Create
     public Review saveReview(Review review) {
-        review.setApproved(false); // new reviews are pending approval
         return reviewRepository.save(review);
-    }
-
-    public Review approveReview(Long id) {
-        Review review = reviewRepository.findById(id).orElse(null);
-        if (review != null) {
-            review.setApproved(true);
-            return reviewRepository.save(review);
-        }
-        return null;
     }
 
 
@@ -72,13 +62,8 @@ public class ReviewService {
 
     // Get average rating of a service
     public double getAverageRating(Long serviceId) {
-        List<Review> reviews = reviewRepository.findByServiceIdAndApprovedTrue(serviceId);
+        List<Review> reviews = reviewRepository.findByServiceId(serviceId);
         return reviews.stream().mapToInt(Review::getRating).average().orElse(0.0);
-    }
-
-
-    public List<Review> getApprovedReviewsByService(Long serviceId) {
-        return reviewRepository.findByServiceIdAndApprovedTrue(serviceId);
     }
 
 

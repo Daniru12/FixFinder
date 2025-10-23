@@ -14,13 +14,13 @@ export default function Reviews({ serviceId }) {
     const fetchReviews = async () => {
       try {
         // Fetch all reviews for the service
-        const res = await axios.get(`http://localhost:8080/reviews/service/${serviceId}/approved`);
+        const res = await axios.get(`http://localhost:8080/reviews/service/${serviceId}`);
 
         setReviews(res.data || []);
 
         // Fetch average rating for the service
         const avgRes = await axios.get(`http://localhost:8080/reviews/service/${serviceId}/average`);
-        setAverageRating(avgRes.data || 0);
+        setAverageRating(Number(avgRes.data) || 0);
       } catch (err) {
         console.error("Failed to fetch reviews:", err);
       } finally {
