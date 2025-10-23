@@ -12,8 +12,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // Find reviews by service
     List<Review> findByServiceId(Long serviceId);
 
-    // Find only approved reviews by service (for public display)
-    List<Review> findByServiceIdAndApprovedTrue(Long serviceId);
 
     // Find reviews by user
     List<Review> findByUserId(Long userId);

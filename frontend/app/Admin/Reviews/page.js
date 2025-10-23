@@ -3,8 +3,7 @@
 import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { adminAPI } from '../../utils/api';
-import { Edit2, Trash2, CheckCircle, X, Eye, Star } from 'lucide-react';
+import { Eye, Star, Trash2 } from 'lucide-react';
 
 export default function AdminReviewManagement() {
   const { user, token, loading: authLoading } = useContext(AuthContext);
@@ -26,9 +25,12 @@ export default function AdminReviewManagement() {
   const loadReviews = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/reviews/admin/all`, {
-        headers: { Authorization: token ? `Bearer ${token}` : undefined }
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/reviews/admin/all`,
+        {
+          headers: { Authorization: token ? `Bearer ${token}` : undefined },
+        }
+      );
       const data = await response.json();
       setReviews(data);
     } catch (err) {
@@ -38,26 +40,16 @@ export default function AdminReviewManagement() {
     }
   };
 
-  const handleApprove = async (id) => {
-    if (!window.confirm('Approve this review?')) return;
-    try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/reviews/admin/approve/${id}`, {
-        method: 'PUT',
-        headers: { Authorization: token ? `Bearer ${token}` : undefined }
-      });
-      loadReviews();
-    } catch (err) {
-      setError(err.message || 'Failed to approve review');
-    }
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this review? This cannot be undone.')) return;
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/reviews/admin/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: token ? `Bearer ${token}` : undefined }
-      });
+      await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/reviews/admin/${id}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: token ? `Bearer ${token}` : undefined },
+        }
+      );
       loadReviews();
     } catch (err) {
       setError(err.message || 'Failed to delete review');
@@ -66,7 +58,8 @@ export default function AdminReviewManagement() {
 
   if (authLoading) return <p className="text-center py-10">Loading...</p>;
 
-  if (!user || user.role !== 'ROLE_ADMIN') return <p className="text-center py-10">Checking access...</p>;
+  if (!user || user.role !== 'ROLE_ADMIN')
+    return <p className="text-center py-10">Checking access...</p>;
 
   if (loading) return <p className="text-center py-10">Loading reviews...</p>;
 
@@ -76,7 +69,7 @@ export default function AdminReviewManagement() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-800">Review Management</h1>
-            <p className="text-gray-600 mt-2">Manage all user reviews</p>
+            <p className="text-gray-600 mt-2">View and delete all user reviews</p>
           </div>
           <button
             onClick={() => router.push('./admin-dashboard')}
@@ -89,7 +82,12 @@ export default function AdminReviewManagement() {
         {error && (
           <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             {error}
-            <button onClick={() => setError(null)} className="ml-4 text-red-800 hover:text-red-900">×</button>
+            <button
+              onClick={() => setError(null)}
+              className="ml-4 text-red-800 hover:text-red-900"
+            >
+              ×
+            </button>
           </div>
         )}
 
@@ -110,7 +108,6 @@ export default function AdminReviewManagement() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rating</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Approved</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -118,32 +115,20 @@ export default function AdminReviewManagement() {
                   {reviews.map((review) => (
                     <tr key={review.id} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{review.id}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{review.user?.username || 'N/A'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{review.service?.name || 'N/A'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {review.user?.username || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {review.service?.name || 'N/A'}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-500 flex items-center">
                         <Star className="w-4 h-4 mr-1" /> {review.rating}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700">{review.comment}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{new Date(review.createdAt).toLocaleString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        {review.approved ? (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full flex items-center">
-                            <CheckCircle className="w-4 h-4 mr-1" /> Approved
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full">Pending</span>
-                        )}
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(review.createdAt).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex space-x-2">
-                        {!review.approved && (
-                          <button
-                            onClick={() => handleApprove(review.id)}
-                            className="text-green-600 hover:text-green-900 transition"
-                            title="Approve Review"
-                          >
-                            <CheckCircle className="w-5 h-5" />
-                          </button>
-                        )}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => handleDelete(review.id)}
                           className="text-red-600 hover:text-red-900 transition"
