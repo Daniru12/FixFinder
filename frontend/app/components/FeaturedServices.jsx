@@ -39,8 +39,16 @@ const FeaturedServices = () => {
 
   // Function to get a placeholder image if service image is not available
   const getServiceImage = (service) => {
-    if (service.images && service.images.length > 0) {
-      return service.images[0];
+    // Check if service has images from backend
+    if (service.images) {
+      // Handle if images is a string (single image URL)
+      if (typeof service.images === 'string') {
+        return service.images;
+      }
+      // Handle if images is an array
+      if (Array.isArray(service.images) && service.images.length > 0) {
+        return service.images[0];
+      }
     }
     
     // Category-based placeholder images from Unsplash
@@ -49,6 +57,11 @@ const FeaturedServices = () => {
       design: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
       development: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
       writing: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+      plumbing: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+      electrical: 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+      cleaning: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+      painting: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+      carpentry: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
       default: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80'
     };
 
