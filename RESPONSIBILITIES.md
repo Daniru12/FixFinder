@@ -31,32 +31,60 @@
 
 ## 🔌 REST API Endpoints (Developed)
 
-| Method       | Path                          | Purpose                  | Auth   |
-| ------------ | ----------------------------- | ------------------------ | ------ |
-| **Auth**     |                               |                          |        |
-| POST         | `/auth/register`              | Register user            | Public |
-| POST         | `/auth/login`                 | Login → JWT + role       | Public |
-| **Users**    |                               |                          |        |
-| GET          | `/users/admin`                | Get all users            | Admin  |
-| GET          | `/users/{id}`                 | Get user by ID           | JWT    |
-| GET          | `/users/username/{username}`  | Get user by username     | JWT    |
-| PUT          | `/users/{id}`                 | Update user              | JWT    |
-| DELETE       | `/users/admin/{id}`           | Delete user              | Admin  |
-| **Services** |                               |                          |        |
-| POST         | `/services/admin/add`         | Add service              | Admin  |
-| GET          | `/services/user/all`          | List all services        | Public |
-| GET          | `/services/user/{id}`         | Get service by ID        | Public |
-| GET          | `/services/user/my-services`  | Provider’s services      | JWT    |
-| PUT          | `/services/admin/{id}`        | Update service           | Admin  |
-| DELETE       | `/services/admin/{id}`        | Delete service           | Admin  |
-| **Bookings** |                               |                          |        |
-| POST         | `/api/bookings`               | Create booking           | JWT    |
-| GET          | `/api/bookings`               | List all bookings        | Admin  |
-| GET          | `/api/bookings/{id}`          | Get booking by ID        | JWT    |
-| GET          | `/api/bookings/customer/{id}` | Get bookings by customer | JWT    |
-| GET          | `/api/bookings/service/{id}`  | Get bookings by service  | JWT    |
-| PUT          | `/api/bookings/{id}`          | Update booking           | JWT    |
-| DELETE       | `/api/bookings/{id}`          | Delete booking           | JWT    |
+Perfect 👍 — here’s your **updated API endpoints table**, now including your new **ProductController** routes, written in the same consistent documentation style.
+
+
+
+| Method       | Path                                    | Purpose                            | Auth   |
+| ------------ | --------------------------------------- | ---------------------------------- | ------ |
+| **Auth**     |                                         |                                    |        |
+| POST         | `/auth/register`                        | Register user                      | Public |
+| POST         | `/auth/login`                           | Login → JWT + role                 | Public |
+| **Users**    |                                         |                                    |        |
+| GET          | `/users/admin`                          | Get all users                      | Admin  |
+| GET          | `/users/{id}`                           | Get user by ID                     | JWT    |
+| GET          | `/users/username/{username}`            | Get user by username               | JWT    |
+| PUT          | `/users/{id}`                           | Update user                        | JWT    |
+| DELETE       | `/users/admin/{id}`                     | Delete user                        | Admin  |
+| **Services** |                                         |                                    |        |
+| POST         | `/services/admin/add`                   | Add service                        | Admin  |
+| GET          | `/services/user/all`                    | List all services                  | Public |
+| GET          | `/services/user/{id}`                   | Get service by ID                  | Public |
+| GET          | `/services/user/my-services`            | Provider’s services                | JWT    |
+| PUT          | `/services/admin/{id}`                  | Update service                     | Admin  |
+| DELETE       | `/services/admin/{id}`                  | Delete service                     | Admin  |
+| **Bookings** |                                         |                                    |        |
+| POST         | `/api/bookings`                         | Create booking                     | JWT    |
+| GET          | `/api/bookings`                         | List all bookings                  | Admin  |
+| GET          | `/api/bookings/{id}`                    | Get booking by ID                  | JWT    |
+| GET          | `/api/bookings/customer/{id}`           | Get bookings by customer           | JWT    |
+| GET          | `/api/bookings/service/{id}`            | Get bookings by service            | JWT    |
+| PUT          | `/api/bookings/{id}`                    | Update booking                     | JWT    |
+| DELETE       | `/api/bookings/{id}`                    | Delete booking                     | JWT    |
+| **Reviews**  |                                         |                                    |        |
+| POST         | `/reviews/add`                          | Add a new review                   | JWT    |
+| GET          | `/reviews`                              | Get all reviews                    | Public |
+| GET          | `/reviews/{id}`                         | Get review by ID                   | Public |
+| PUT          | `/reviews/{id}`                         | Update review                      | JWT    |
+| DELETE       | `/reviews/admin/{id}`                   | Delete review                      | Admin  |
+| GET          | `/reviews/service/{serviceId}`          | Get reviews for a service          | Public |
+| GET          | `/reviews/user/{userId}`                | Get reviews by user                | JWT    |
+| GET          | `/reviews/service/{serviceId}/average`  | Get average rating for a service   | Public |
+| GET          | `/reviews/admin/all`                    | Get all reviews (Admin panel)      | Admin  |
+| **Products** |                                         |                                    |        |
+| POST         | `/products/create`                      | Create product (Admin or Provider) | JWT    |
+| GET          | `/products`                             | Get all active products            | Public |
+| GET          | `/products/all`                         | Get all products (active/inactive) | Admin  |
+| GET          | `/products/{id}`                        | Get product by ID                  | Public |
+| GET          | `/products/category/{category}`         | Get products by category           | Public |
+| GET          | `/products/search?name={name}`          | Search products by name            | Public |
+| GET          | `/products/my-products`                 | Get provider’s own products        | JWT    |
+| PUT          | `/products/{id}`                        | Update product                     | JWT    |
+| PUT          | `/products/{id}/stock?stock={quantity}` | Update product stock quantity      | JWT    |
+| DELETE       | `/products/{id}`                        | Delete product                     | JWT    |
+| GET          | `/products/admin/all`                   | Get all products (Admin)           | Admin  |
+| GET          | `/products/admin/provider/{providerId}` | Get products by provider (Admin)   | Admin  |
+
 
 ---
 
